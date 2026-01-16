@@ -74,7 +74,7 @@
 
   // --- Data model ---
   // Hero shape:
-  // { id, name, rarity, unlocked, level, stars, skills: number[], updatedAt }
+  // { id, name, rarity, unlocked, level, stars, skills: { conquest: number[], expedition: number[] }, updatedAt }
   function nowIso() {
     return new Date().toISOString();
   }
@@ -89,21 +89,44 @@
         unlocked: false,
         level: 0,
         stars: 0,
-        skills: [0, 0, 0, 0, 0, 0],
+        skills: {
+          conquest: [],
+          expedition: [],
+        },
         updatedAt: nowIso(),
       });
     });
   }
 
-  function normalizeSkills(input) {
-    if (!Array.isArray(input)) return [0, 0, 0, 0, 0, 0];
-    const values = input.map((value) => {
+  function skillLimitsForRarity(rarity) {
+    const key = String(rarity || "R").toLowerCase();
+    if (key === "sr") return { conquest: 3, expedition: 2 };
+    if (key === "ssr") return { conquest: 3, expedition: 3 };
+    return { conquest: 2, expedition: 2 };
+  }
+
+  function normalizeSkillGroup(input, limit) {
+    const values = Array.isArray(input) ? input : [];
+    const normalized = values.map((value) => {
       const num = Number(value);
       if (!Number.isFinite(num)) return 0;
       return Math.max(0, Math.floor(num));
     });
-    while (values.length < 6) values.push(0);
-    return values.slice(0, 6);
+    while (normalized.length < limit) normalized.push(0);
+    return normalized.slice(0, limit);
+  }
+
+  function normalizeSkills(input, rarity) {
+    const limits = skillLimitsForRarity(rarity);
+    if (Array.isArray(input)) {
+      return {
+        conquest: normalizeSkillGroup(input.slice(0, 3), limits.conquest),
+        expedition: normalizeSkillGroup(input.slice(3, 6), limits.expedition),
+      };
+    }
+    const conquest = normalizeSkillGroup(input?.conquest, limits.conquest);
+    const expedition = normalizeSkillGroup(input?.expedition, limits.expedition);
+    return { conquest, expedition };
   }
 
   function sanitizeHero(h) {
@@ -112,7 +135,7 @@
     const level = Number.isFinite(Number(h.level)) ? Math.max(0, Math.floor(Number(h.level))) : 0;
     const stars = Number.isFinite(Number(h.stars)) ? Math.max(0, Math.floor(Number(h.stars))) : 0;
     const unlocked = Boolean(h.unlocked);
-    const skills = normalizeSkills(h.skills);
+    const skills = normalizeSkills(h.skills, rarity);
     const id = String(h.id || "");
     const updatedAt = String(h.updatedAt || nowIso());
 
@@ -192,24 +215,18 @@
     const view = rosterForView();
     const skillsOptions = Array.from({ length: 6 }, (_, value) => value);
     const starsOptions = Array.from({ length: 6 }, (_, value) => value);
-    const skillCountsByRarity = {
-      r: { conquest: 2, expedition: 2 },
-      sr: { conquest: 3, expedition: 2 },
-      ssr: { conquest: 3, expedition: 3 },
-    };
     if (tbody) {
       tbody.innerHTML = view.map((h) => {
         const lockedClass = h.unlocked ? "" : " is-locked";
         const disabledAttr = h.unlocked ? "" : "disabled";
-        const skills = normalizeSkills(h.skills);
         const rarity = h.rarity || "R";
         const rarityClass = `rarity-${rarity.toLowerCase()}`;
-        const rarityKey = rarity.toLowerCase();
-        const counts = skillCountsByRarity[rarityKey] || skillCountsByRarity.r;
-        const conquestEnabled = [true, true, counts.conquest >= 3];
-        const expeditionEnabled = [true, true, counts.expedition >= 3];
-        const conquestDisabled = (index) => (!h.unlocked || !conquestEnabled[index]) ? "disabled" : "";
-        const expeditionDisabled = (index) => (!h.unlocked || !expeditionEnabled[index]) ? "disabled" : "";
+        const limits = skillLimitsForRarity(rarity);
+        const skills = normalizeSkills(h.skills, rarity);
+        const conquestDisabled = (index) => (!h.unlocked || index >= limits.conquest) ? "disabled" : "";
+        const expeditionDisabled = (index) => (!h.unlocked || index >= limits.expedition) ? "disabled" : "";
+        const conquestValue = (index) => skills.conquest[index];
+        const expeditionValue = (index) => skills.expedition[index];
         return `
           <tr class="${lockedClass.trim()}" data-id="${escapeHtml(h.id)}">
             <td><strong class="${escapeHtml(rarityClass)}">${escapeHtml(h.name)}</strong></td>
@@ -227,46 +244,58 @@
               </select>
             </td>
             <td class="num">
-              <select class="select select-sm" data-field="skill1" ${conquestDisabled(0)}>
-                ${skillsOptions.map((value) => `
-                  <option value="${value}" ${value === Number(skills[0]) ? "selected" : ""}>${value}</option>
-                `).join("")}
-              </select>
+              ${limits.conquest >= 1 ? `
+                <select class="select select-sm" data-field="conquest1" ${conquestDisabled(0)}>
+                  ${skillsOptions.map((value) => `
+                    <option value="${value}" ${value === Number(conquestValue(0)) ? "selected" : ""}>${value}</option>
+                  `).join("")}
+                </select>
+              ` : `<span class="muted">—</span>`}
             </td>
             <td class="num">
-              <select class="select select-sm" data-field="skill2" ${conquestDisabled(1)}>
-                ${skillsOptions.map((value) => `
-                  <option value="${value}" ${value === Number(skills[1]) ? "selected" : ""}>${value}</option>
-                `).join("")}
-              </select>
+              ${limits.conquest >= 2 ? `
+                <select class="select select-sm" data-field="conquest2" ${conquestDisabled(1)}>
+                  ${skillsOptions.map((value) => `
+                    <option value="${value}" ${value === Number(conquestValue(1)) ? "selected" : ""}>${value}</option>
+                  `).join("")}
+                </select>
+              ` : `<span class="muted">—</span>`}
             </td>
             <td class="num">
-              <select class="select select-sm" data-field="skill3" ${conquestDisabled(2)}>
-                ${skillsOptions.map((value) => `
-                  <option value="${value}" ${value === Number(skills[2]) ? "selected" : ""}>${value}</option>
-                `).join("")}
-              </select>
+              ${limits.conquest >= 3 ? `
+                <select class="select select-sm" data-field="conquest3" ${conquestDisabled(2)}>
+                  ${skillsOptions.map((value) => `
+                    <option value="${value}" ${value === Number(conquestValue(2)) ? "selected" : ""}>${value}</option>
+                  `).join("")}
+                </select>
+              ` : `<span class="muted">—</span>`}
             </td>
             <td class="num">
-              <select class="select select-sm" data-field="skill4" ${expeditionDisabled(0)}>
-                ${skillsOptions.map((value) => `
-                  <option value="${value}" ${value === Number(skills[3]) ? "selected" : ""}>${value}</option>
-                `).join("")}
-              </select>
+              ${limits.expedition >= 1 ? `
+                <select class="select select-sm" data-field="expedition1" ${expeditionDisabled(0)}>
+                  ${skillsOptions.map((value) => `
+                    <option value="${value}" ${value === Number(expeditionValue(0)) ? "selected" : ""}>${value}</option>
+                  `).join("")}
+                </select>
+              ` : `<span class="muted">—</span>`}
             </td>
             <td class="num">
-              <select class="select select-sm" data-field="skill5" ${expeditionDisabled(1)}>
-                ${skillsOptions.map((value) => `
-                  <option value="${value}" ${value === Number(skills[4]) ? "selected" : ""}>${value}</option>
-                `).join("")}
-              </select>
+              ${limits.expedition >= 2 ? `
+                <select class="select select-sm" data-field="expedition2" ${expeditionDisabled(1)}>
+                  ${skillsOptions.map((value) => `
+                    <option value="${value}" ${value === Number(expeditionValue(1)) ? "selected" : ""}>${value}</option>
+                  `).join("")}
+                </select>
+              ` : `<span class="muted">—</span>`}
             </td>
             <td class="num">
-              <select class="select select-sm" data-field="skill6" ${expeditionDisabled(2)}>
-                ${skillsOptions.map((value) => `
-                  <option value="${value}" ${value === Number(skills[5]) ? "selected" : ""}>${value}</option>
-                `).join("")}
-              </select>
+              ${limits.expedition >= 3 ? `
+                <select class="select select-sm" data-field="expedition3" ${expeditionDisabled(2)}>
+                  ${skillsOptions.map((value) => `
+                    <option value="${value}" ${value === Number(expeditionValue(2)) ? "selected" : ""}>${value}</option>
+                  `).join("")}
+                </select>
+              ` : `<span class="muted">—</span>`}
             </td>
           </tr>
         `;
@@ -294,10 +323,14 @@
       hero.level = Math.max(0, Math.floor(Number(value) || 0));
     } else if (field === "stars") {
       hero.stars = Math.max(0, Math.floor(Number(value) || 0));
-    } else if (field.startsWith("skill")) {
-      const idx = Number(field.replace("skill", "")) - 1;
-      const updated = normalizeSkills(hero.skills);
-      updated[idx] = Math.max(0, Math.floor(Number(value) || 0));
+    } else if (field.startsWith("conquest") || field.startsWith("expedition")) {
+      const isConquest = field.startsWith("conquest");
+      const idx = Number(field.replace(isConquest ? "conquest" : "expedition", "")) - 1;
+      if (Number.isNaN(idx) || idx < 0) return;
+      const updated = normalizeSkills(hero.skills, hero.rarity);
+      const group = isConquest ? updated.conquest : updated.expedition;
+      if (idx >= group.length) return;
+      group[idx] = Math.max(0, Math.floor(Number(value) || 0));
       hero.skills = updated;
     }
     hero.updatedAt = nowIso();
