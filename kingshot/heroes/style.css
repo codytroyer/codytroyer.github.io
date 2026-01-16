@@ -190,7 +190,8 @@ a{color:inherit}
 @media(min-width:860px){.io-grid{grid-template-columns:1fr 1fr}}
 .io-card{border-radius:var(--radius2);border:1px solid var(--border);background:rgba(255,255,255,.03);padding:12px}
 .io-card h3{margin:0 0 6px 0;font-size:14px}
-.file{width:100%;margin:8px 0 8px 0}
+.io-actions{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.file{width:100%;margin:0}
 
 .site-footer{
   border-top:1px solid var(--border);

@@ -101,14 +101,18 @@
         <div class="io-card">
           <h3>Export</h3>
           <p class="muted">Download a JSON file of your roster.</p>
-          <button class="btn primary" id="exportBtn" type="button">Download JSON</button>
+          <div class="io-actions">
+            <button class="btn primary" id="exportBtn" type="button">Download JSON</button>
+          </div>
         </div>
 
         <div class="io-card">
           <h3>Import</h3>
           <p class="muted">Load a previously exported JSON file.</p>
-          <input class="file" id="importFile" type="file" accept="application/json" />
-          <button class="btn" id="importBtn" type="button">Import (replace roster)</button>
+          <div class="io-actions">
+            <input class="file" id="importFile" type="file" accept="application/json" />
+            <button class="btn" id="importBtn" type="button">Import (replace roster)</button>
+          </div>
         </div>
       </div>
     </section>
