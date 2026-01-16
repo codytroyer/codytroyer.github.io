@@ -125,6 +125,18 @@ a{color:inherit}
   margin: 10px 0 12px 0;
 }
 
+.bonus-grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:12px;
+}
+@media(min-width:720px){
+  .bonus-grid{grid-template-columns: repeat(2, minmax(0, 1fr));}
+}
+@media(min-width:960px){
+  .bonus-grid{grid-template-columns: repeat(4, minmax(0, 1fr));}
+}
+
 .control{display:grid;gap:6px}
 .label{color:var(--muted2);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
 .input,.select,.textarea{

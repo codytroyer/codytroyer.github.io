@@ -3,6 +3,7 @@
 
   const STORAGE_KEY = "kingshot:pets:v1";
   const LEGACY_STORAGE_KEY = "kingshot:pets:v0";
+  const BONUS_KEY = "kingshot:pets:bonuses:v1";
   const THEME_KEY = "kingshot-theme";
   const DEBUG_PANEL_KEY = "kingshot:pets:debug";
   const { DEFAULT_PETS, PET_RARITY_BY_NAME } = window.KINGSHOT_PET_CONSTANTS || {};
@@ -50,6 +51,16 @@
   const importBtn = document.getElementById("importBtn");
 
   const toggleThemeBtn = document.getElementById("toggleTheme");
+  const bonusInputs = [
+    { id: "bonusInfLethality", key: "infantryLethality" },
+    { id: "bonusInfHealth", key: "infantryHealth" },
+    { id: "bonusCavLethality", key: "cavalryLethality" },
+    { id: "bonusCavHealth", key: "cavalryHealth" },
+    { id: "bonusArcherLethality", key: "archerLethality" },
+    { id: "bonusArcherHealth", key: "archerHealth" },
+    { id: "bonusSquadAttack", key: "squadAttack" },
+    { id: "bonusSquadDefense", key: "squadDefense" },
+  ];
 
   function applyTheme(theme) {
     if (theme === "light" || theme === "dark") root.dataset.theme = theme;
@@ -190,6 +201,42 @@
     saveRoster(roster);
   }
 
+  function parseBonusInput(raw) {
+    if (raw === null || raw === undefined) return 0;
+    const cleaned = String(raw).replace(/[%\s,]/g, "");
+    if (cleaned === "") return 0;
+    const value = Number(cleaned);
+    if (!Number.isFinite(value)) return 0;
+    return Math.max(0, value);
+  }
+
+  function formatBonusValue(value) {
+    const num = Number.isFinite(Number(value)) ? Math.max(0, Number(value)) : 0;
+    const formatted = num.toLocaleString("en-US", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
+    return formatted;
+  }
+
+  function loadBonuses() {
+    try {
+      const raw = localStorage.getItem(BONUS_KEY);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") return {};
+      return parsed;
+    } catch {
+      return {};
+    }
+  }
+
+  function saveBonuses(bonuses) {
+    localStorage.setItem(BONUS_KEY, JSON.stringify(bonuses));
+  }
+
+  const bonusState = loadBonuses();
+
   function escapeHtml(s) {
     return String(s)
       .replaceAll("&", "&amp;")
@@ -224,6 +271,13 @@
 
   function render() {
     if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+
+    bonusInputs.forEach(({ id, key }) => {
+      const input = document.getElementById(id);
+      if (!input) return;
+      const value = bonusState?.[key] ?? 0;
+      input.value = formatBonusValue(value);
+    });
 
     const view = rosterForView();
     if (tbody) {
@@ -335,6 +389,20 @@
   }
 
   if (searchEl) searchEl.addEventListener("input", render);
+
+  bonusInputs.forEach(({ id, key }) => {
+    const input = document.getElementById(id);
+    if (!input) return;
+
+    input.addEventListener("input", () => {
+      bonusState[key] = parseBonusInput(input.value);
+      saveBonuses(bonusState);
+    });
+
+    input.addEventListener("blur", () => {
+      input.value = formatBonusValue(parseBonusInput(input.value));
+    });
+  });
 
   function download(filename, text) {
     const blob = new Blob([text], { type: "application/json;charset=utf-8" });
