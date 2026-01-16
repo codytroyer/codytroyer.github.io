@@ -160,6 +160,9 @@ a{color:inherit}
 .table .input[disabled]{opacity:.6}
 .table .select[disabled]{opacity:.6}
 .is-locked{opacity:.65}
+.rarity-r{color:#55a7ff}
+.rarity-sr{color:#a975ff}
+.rarity-ssr{color:#f7c56a}
 
 .empty{padding:14px;border-radius:var(--radius2);border:1px dashed var(--border);background:rgba(255,255,255,.02)}
 .empty h3{margin:0 0 6px 0}

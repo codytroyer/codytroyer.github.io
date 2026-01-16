@@ -6,34 +6,34 @@
   const LEGACY_STORAGE_KEY = "kingshot:heroes:v1";
   const THEME_KEY = "kingshot-theme";
   const DEFAULT_HEROES = [
-    { name: "Rosa", rarity: "R" },
-    { name: "Alcar", rarity: "R" },
-    { name: "Zoe", rarity: "R" },
-    { name: "Jabel", rarity: "R" },
-    { name: "Petra", rarity: "R" },
-    { name: "Long Fei", rarity: "R" },
-    { name: "Diana", rarity: "R" },
-    { name: "Chenko", rarity: "R" },
-    { name: "Quinn", rarity: "SR" },
-    { name: "Gordon", rarity: "SR" },
-    { name: "Howard", rarity: "SR" },
-    { name: "Hilde", rarity: "SR" },
-    { name: "Marlin", rarity: "SR" },
-    { name: "Amadeus", rarity: "SR" },
-    { name: "Forrest", rarity: "SR" },
-    { name: "Olive", rarity: "SR" },
-    { name: "Fahd", rarity: "SR" },
-    { name: "Amane", rarity: "SSR" },
-    { name: "Yeonwoo", rarity: "SSR" },
+    { name: "Rosa", rarity: "SSR" },
+    { name: "Alcar", rarity: "SSR" },
+    { name: "Zoe", rarity: "SSR" },
+    { name: "Jabel", rarity: "SSR" },
+    { name: "Petra", rarity: "SSR" },
+    { name: "Long Fei", rarity: "SSR" },
+    { name: "Hilde", rarity: "SSR" },
+    { name: "Marlin", rarity: "SSR" },
+    { name: "Amadeus", rarity: "SSR" },
     { name: "Jaeger", rarity: "SSR" },
-    { name: "Edwin", rarity: "SSR" },
-    { name: "Seth", rarity: "SSR" },
     { name: "Margot", rarity: "SSR" },
     { name: "Eric", rarity: "SSR" },
     { name: "Saul", rarity: "SSR" },
     { name: "Helga", rarity: "SSR" },
     { name: "Vivian", rarity: "SSR" },
     { name: "Thrud", rarity: "SSR" },
+    { name: "Diana", rarity: "SR" },
+    { name: "Chenko", rarity: "SR" },
+    { name: "Quinn", rarity: "SR" },
+    { name: "Gordon", rarity: "SR" },
+    { name: "Howard", rarity: "SR" },
+    { name: "Fahd", rarity: "SR" },
+    { name: "Amane", rarity: "SR" },
+    { name: "Yeonwoo", rarity: "SR" },
+    { name: "Forrest", rarity: "R" },
+    { name: "Olive", rarity: "R" },
+    { name: "Edwin", rarity: "R" },
+    { name: "Seth", rarity: "R" },
   ];
 
   // Elements
@@ -192,26 +192,18 @@
     const view = rosterForView();
     const skillsOptions = Array.from({ length: 6 }, (_, value) => value);
     const starsOptions = Array.from({ length: 6 }, (_, value) => value);
-    const rarityOptions = ["R", "SR", "SSR"];
-
     if (tbody) {
       tbody.innerHTML = view.map((h) => {
         const lockedClass = h.unlocked ? "" : " is-locked";
         const disabledAttr = h.unlocked ? "" : "disabled";
         const skills = normalizeSkills(h.skills);
         const rarity = h.rarity || "R";
+        const rarityClass = `rarity-${rarity.toLowerCase()}`;
         return `
           <tr class="${lockedClass.trim()}" data-id="${escapeHtml(h.id)}">
-            <td><strong>${escapeHtml(h.name)}</strong></td>
+            <td><strong class="${escapeHtml(rarityClass)}">${escapeHtml(h.name)}</strong></td>
             <td class="num">
               <input class="checkbox" type="checkbox" data-field="unlocked" ${h.unlocked ? "checked" : ""} />
-            </td>
-            <td class="num">
-              <select class="select select-sm" data-field="rarity" ${disabledAttr}>
-                ${rarityOptions.map((option) => `
-                  <option value="${escapeHtml(option)}" ${option === rarity ? "selected" : ""}>${escapeHtml(option)}</option>
-                `).join("")}
-              </select>
             </td>
             <td class="num">
               <input class="input input-sm" type="number" data-field="level" min="0" max="80" value="${escapeHtml(h.level)}" ${disabledAttr} />
@@ -287,8 +279,6 @@
     if (!hero) return;
     if (field === "unlocked") {
       hero.unlocked = Boolean(value);
-    } else if (field === "rarity") {
-      hero.rarity = String(value || "R").trim() || "R";
     } else if (field === "level") {
       hero.level = Math.max(0, Math.floor(Number(value) || 0));
     } else if (field === "stars") {
