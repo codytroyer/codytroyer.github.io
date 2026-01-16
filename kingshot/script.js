@@ -63,6 +63,15 @@
       cta: "Open",
       disabled: false,
     },
+    {
+      title: "Governor Gear & Charms",
+      status: "live",
+      desc: "Track governor gear tiers and charm levels with local-first saves and import/export backups.",
+      tags: ["gear", "charms", "progress"],
+      href: "governor-gear-charms/",
+      cta: "Open",
+      disabled: false,
+    },
 
 
     {
