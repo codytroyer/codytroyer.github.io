@@ -190,7 +190,7 @@ a{color:inherit}
 .empty{padding:14px;border-radius:var(--radius2);border:1px dashed var(--border);background:rgba(255,255,255,.02)}
 .empty h3{margin:0 0 6px 0}
 
-.bonus-grid{display:grid;gap:16px}
+.bonus-grid{display:grid;gap:16px;align-items:start}
 @media(min-width:900px){
   .bonus-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
@@ -202,6 +202,7 @@ a{color:inherit}
   padding:12px;
   display:grid;
   gap:10px;
+  align-self:start;
 }
 .bonus-card h3{margin:0;font-size:15px}
 .bonus-list{display:grid;gap:8px}
