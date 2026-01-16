@@ -87,7 +87,7 @@
         name: hero.name,
         rarity: hero.rarity,
         unlocked: false,
-        level: 0,
+        level: 1,
         stars: 0,
         skills: {
           conquest: [],
@@ -132,7 +132,7 @@
   function sanitizeHero(h) {
     const name = String(h.name || "").trim().slice(0, 60);
     const rarity = String(h.rarity || "R").trim().slice(0, 20) || "R";
-    const level = Number.isFinite(Number(h.level)) ? Math.max(0, Math.floor(Number(h.level))) : 0;
+    const level = Number.isFinite(Number(h.level)) ? Math.max(1, Math.floor(Number(h.level))) : 1;
     const stars = Number.isFinite(Number(h.stars)) ? Math.max(0, Math.floor(Number(h.stars))) : 0;
     const unlocked = Boolean(h.unlocked);
     const skills = normalizeSkills(h.skills, rarity);
@@ -215,6 +215,7 @@
     const view = rosterForView();
     const skillsOptions = Array.from({ length: 6 }, (_, value) => value);
     const starsOptions = Array.from({ length: 6 }, (_, value) => value);
+    const levelOptions = Array.from({ length: 80 }, (_, index) => index + 1);
     if (tbody) {
       tbody.innerHTML = view.map((h) => {
         const lockedClass = h.unlocked ? "" : " is-locked";
@@ -234,7 +235,11 @@
               <input class="checkbox" type="checkbox" data-field="unlocked" ${h.unlocked ? "checked" : ""} />
             </td>
             <td class="num">
-              <input class="input input-sm" type="number" data-field="level" min="0" max="80" value="${escapeHtml(h.level)}" ${disabledAttr} />
+              <select class="select select-sm" data-field="level" ${disabledAttr}>
+                ${levelOptions.map((value) => `
+                  <option value="${value}" ${value === Number(h.level) ? "selected" : ""}>${value}</option>
+                `).join("")}
+              </select>
             </td>
             <td class="num">
               <select class="select select-sm" data-field="stars" ${disabledAttr}>
@@ -320,7 +325,7 @@
     if (field === "unlocked") {
       hero.unlocked = Boolean(value);
     } else if (field === "level") {
-      hero.level = Math.max(0, Math.floor(Number(value) || 0));
+      hero.level = Math.max(1, Math.floor(Number(value) || 1));
     } else if (field === "stars") {
       hero.stars = Math.max(0, Math.floor(Number(value) || 0));
     } else if (field.startsWith("conquest") || field.startsWith("expedition")) {
