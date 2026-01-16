@@ -98,6 +98,12 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(roster));
   }
 
+  function updateDebugPreview() {
+    if (debugPreview && debugPanel && !debugPanel.hidden) {
+      debugPreview.textContent = JSON.stringify(roster, null, 2);
+    }
+  }
+
   function render() {
     if (yearEl) yearEl.textContent = String(new Date().getFullYear());
     if (!troopGrid) return;
@@ -134,9 +140,7 @@
       `;
     }).join("");
 
-    if (debugPreview && debugPanel && !debugPanel.hidden) {
-      debugPreview.textContent = JSON.stringify(roster, null, 2);
-    }
+    updateDebugPreview();
   }
 
   function updateLevel(typeId, level, value) {
@@ -146,6 +150,7 @@
     troop.levels[level] = Number.isFinite(numeric) && numeric >= 0 ? Math.floor(numeric) : 0;
     troop.updatedAt = nowIso();
     saveRoster();
+    updateDebugPreview();
   }
 
   let roster = loadRoster();
@@ -161,7 +166,6 @@
       const level = Number(target.dataset.level);
       if (!typeId || Number.isNaN(level)) return;
       updateLevel(typeId, level, target.value);
-      render();
     });
   }
 
