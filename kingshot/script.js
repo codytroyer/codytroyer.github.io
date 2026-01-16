@@ -28,6 +28,15 @@
       disabled: false,
     },
     {
+      title: "Troops Roster",
+      status: "live",
+      desc: "Track your archer, cavalry, and infantry counts by level for reuse across planning tools.",
+      tags: ["troops", "profile", "saved data"],
+      href: "troops/",
+      cta: "Open",
+      disabled: false,
+    },
+    {
       title: "Bear Event Optimizer",
       status: "live",
       desc: "Optimize Bear rally and join rally troop splits with archer-first, capacity-aware planning.",

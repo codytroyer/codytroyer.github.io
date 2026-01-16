@@ -23,3 +23,11 @@ their levels, stars, and skill values.
 - Export/Import JSON is supported for backup and transfer between devices
 - No accounts, no server, and no credential collection
 - A developer-only debug panel can be enabled by setting `localStorage.setItem("kingshot:heroes:debug", "1")`
+
+### Troops Roster (`/kingshot/troops/`)
+A local-first tracker to capture troop counts by level for archers, cavalry, and infantry. The grid mirrors
+the roster layout and stores totals for reuse across calculators.
+
+- Data is stored locally in the browser using `localStorage`
+- No accounts, no server, and no credential collection
+- A developer-only debug panel can be enabled by setting `localStorage.setItem("kingshot:troops:debug", "1")`

@@ -3,12 +3,14 @@
   const yearEl = document.getElementById("year");
   const toggleThemeBtn = document.getElementById("toggleTheme");
 
-  const infantryInput = document.getElementById("infantry");
-  const cavalryInput = document.getElementById("cavalry");
-  const archersInput = document.getElementById("archers");
   const bearCapacityInput = document.getElementById("bearCapacity");
   const joinCapacityInput = document.getElementById("joinCapacity");
   const joinCountInput = document.getElementById("joinCount");
+
+  const infantryTotalEl = document.getElementById("infantryTotal");
+  const cavalryTotalEl = document.getElementById("cavalryTotal");
+  const archersTotalEl = document.getElementById("archersTotal");
+  const troopNoteEl = document.getElementById("troopNote");
 
   const infantryBar = document.getElementById("infantryBar");
   const cavalryBar = document.getElementById("cavalryBar");
@@ -29,6 +31,7 @@
   const HERO_STORAGE_KEY = "kingshot:heroes:v2";
   const HERO_LEGACY_KEY = "kingshot:heroes:v1";
   const HERO_TYPES = ["Infantry", "Cavalry", "Archer"];
+  const TROOP_STORAGE_KEY = "kingshot:troops:v1";
 
   function applyTheme(theme) {
     if (theme === "light" || theme === "dark") {
@@ -129,6 +132,25 @@
     return results;
   }
 
+  function loadTroopRoster() {
+    try {
+      const raw = localStorage.getItem(TROOP_STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function sumTroopLevels(levels) {
+    if (!levels || typeof levels !== "object") return 0;
+    return Object.values(levels).reduce((total, value) => {
+      const numeric = Number(value);
+      return total + (Number.isFinite(numeric) && numeric > 0 ? Math.floor(numeric) : 0);
+    }, 0);
+  }
+
   function loadRoster() {
     const tryLoad = (key) => {
       try {
@@ -165,9 +187,10 @@
   }
 
   function render() {
-    const infantry = parseNumber(infantryInput?.value);
-    const cavalry = parseNumber(cavalryInput?.value);
-    const archers = parseNumber(archersInput?.value);
+    const troopRoster = loadTroopRoster();
+    const infantry = sumTroopLevels(troopRoster?.infantry?.levels);
+    const cavalry = sumTroopLevels(troopRoster?.cavalry?.levels);
+    const archers = sumTroopLevels(troopRoster?.archers?.levels);
     const bearCapacity = parseNumber(bearCapacityInput?.value);
     const joinCapacity = parseNumber(joinCapacityInput?.value);
     const joinCount = clamp(parseNumber(joinCountInput?.value), 1, 6);
@@ -176,6 +199,15 @@
 
     const totalTroops = infantry + cavalry + archers;
     const totalCapacity = bearCapacity + joinCapacity * joinCount;
+
+    if (infantryTotalEl) infantryTotalEl.textContent = formatNumber(infantry);
+    if (cavalryTotalEl) cavalryTotalEl.textContent = formatNumber(cavalry);
+    if (archersTotalEl) archersTotalEl.textContent = formatNumber(archers);
+    if (troopNoteEl) {
+      troopNoteEl.textContent = troopRoster
+        ? "Totals pulled from saved roster."
+        : "No saved troops yet. Add counts in the Troops roster.";
+    }
 
     const archersUsed = Math.min(archers, totalCapacity);
     const remaining = Math.max(totalCapacity - archersUsed, 0);
@@ -310,7 +342,7 @@
     `;
   }
 
-  [infantryInput, cavalryInput, archersInput, bearCapacityInput, joinCapacityInput, joinCountInput]
+  [bearCapacityInput, joinCapacityInput, joinCountInput]
     .filter(Boolean)
     .forEach((input) => {
       input.addEventListener("input", render);

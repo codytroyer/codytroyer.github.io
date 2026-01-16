@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Save your Kingshot troop counts by level for reuse across tools." />
+  <title>Kingshot Troops Roster</title>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="../" aria-label="Back to Kingshot tools">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-text">Kingshot Labs</span>
+      </a>
+
+      <nav class="header-nav" aria-label="Primary">
+        <a class="nav-link" href="../">Tools</a>
+        <a class="nav-link" href="#troops">Troops</a>
+        <a class="nav-link" href="#debugPanel">Debug</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn ghost" id="toggleTheme" type="button">Theme</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main">
+    <section class="hero">
+      <div class="badge-row">
+        <span class="badge">Live tool</span>
+        <span class="badge subtle">Saved locally</span>
+      </div>
+      <h1>Troops Roster</h1>
+      <p class="muted lead">
+        Capture your current troop counts by level for archers, cavalry, and infantry. This local roster can
+        power future tools that reference your base strength or total troop totals.
+      </p>
+
+      <div class="notice">
+        <strong>Privacy:</strong> This roster is saved in <code>localStorage</code> on this device/browser only.
+        Clearing site data or using a different browser/device will reset it.
+      </div>
+    </section>
+
+    <section class="panel" id="troops" aria-label="Troops editor">
+      <div class="panel-head">
+        <h2>Your troops</h2>
+        <div class="panel-actions">
+          <button class="btn ghost" id="resetTroops" type="button">Reset counts</button>
+        </div>
+      </div>
+
+      <div class="troop-grid" id="troopGrid"></div>
+    </section>
+
+    <section class="panel" id="debugPanel" aria-label="Data model" hidden>
+      <div class="panel-head">
+        <h2>For future tools</h2>
+        <p class="muted small">
+          This page stores a simple troop count object other tools can read. Upcoming calculators can pull your
+          totals to estimate rally strength or event requirements.
+        </p>
+      </div>
+      <pre class="code"><code id="debugPreview" aria-label="Troop JSON preview"></code></pre>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span class="muted small">© <span id="year"></span> Kingshot Labs</span>
+      <a class="muted small" href="../">Back to tools</a>
+    </div>
+  </footer>
+
+  <script src="script.js" defer></script>
+</body>
+</html>

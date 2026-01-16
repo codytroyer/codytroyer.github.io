@@ -37,7 +37,7 @@
       </div>
       <h1>Bear Event Optimizer</h1>
       <p class="muted lead">
-        Plug in your troop inventory and rally capacity to generate a Bear rally + squad breakdown.
+        Use your saved troop inventory and rally capacity to generate a Bear rally + squad breakdown.
         This optimizer prioritizes archers first, then splits the remaining capacity between cavalry and
         infantry. Use it to quickly see how many troops to deploy per rally.
       </p>
@@ -51,33 +51,37 @@
     <section class="panel" id="inputs" aria-label="Troops and capacity inputs">
       <div class="panel-head">
         <h2>1) Your troops & capacity</h2>
-        <p class="muted small">Enter current troop counts and rally sizes.</p>
+        <p class="muted small">Troop counts pull from your Troops roster. Enter rally sizes here.</p>
       </div>
 
       <div class="grid two">
         <div class="card">
           <h3>Troop inventory</h3>
+          <p class="muted small">
+            Pulled from <a href="../troops/">Troops roster</a>. Update your counts there to refresh this plan.
+          </p>
           <div class="control">
-            <label class="label" for="infantry">Infantry available</label>
-            <input class="input" id="infantry" type="number" min="0" value="120000" />
+            <span class="label">Infantry available</span>
+            <div class="metric" id="infantryTotal">0</div>
             <div class="bar" aria-hidden="true">
               <span class="fill" id="infantryBar"></span>
             </div>
           </div>
           <div class="control">
-            <label class="label" for="cavalry">Cavalry available</label>
-            <input class="input" id="cavalry" type="number" min="0" value="120000" />
+            <span class="label">Cavalry available</span>
+            <div class="metric" id="cavalryTotal">0</div>
             <div class="bar" aria-hidden="true">
               <span class="fill" id="cavalryBar"></span>
             </div>
           </div>
           <div class="control">
-            <label class="label" for="archers">Archers available</label>
-            <input class="input" id="archers" type="number" min="0" value="180000" />
+            <span class="label">Archers available</span>
+            <div class="metric" id="archersTotal">0</div>
             <div class="bar" aria-hidden="true">
               <span class="fill" id="archerBar"></span>
             </div>
           </div>
+          <p class="muted small" id="troopNote"></p>
         </div>
 
         <div class="card">
