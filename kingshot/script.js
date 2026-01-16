@@ -37,6 +37,15 @@
       disabled: false,
     },
     {
+      title: "Pets Roster",
+      status: "live",
+      desc: "Track pet levels, ability level, and refinement tiers to reuse across Kingshot tools.",
+      tags: ["pets", "profile", "saved data"],
+      href: "pets/",
+      cta: "Open",
+      disabled: false,
+    },
+    {
       title: "Bear Event Optimizer",
       status: "live",
       desc: "Optimize Bear rally and join rally troop splits with archer-first, capacity-aware planning.",
