@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Plan and track Kingshot research progression." />
+  <title>Kingshot Research Planner</title>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="../" aria-label="Back to Kingshot tools">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-text">Kingshot Labs</span>
+      </a>
+
+      <nav class="header-nav" aria-label="Primary">
+        <a class="nav-link" href="../">Tools</a>
+        <a class="nav-link" href="#tree">Research tree</a>
+        <a class="nav-link" href="#bonus">Total bonus</a>
+        <a class="nav-link" href="#import">Import/Export</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn ghost" id="toggleTheme" type="button">Theme</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main">
+    <section class="hero">
+      <div class="badge-row">
+        <span class="badge">Live tool</span>
+        <span class="badge subtle">Saved locally</span>
+      </div>
+      <h1>Research Planner</h1>
+      <p class="muted lead">
+        Track your Kingshot research progression across Growth, Economy, and Battle trees. The planner
+        locks later tiers until the required stages are marked complete and stores everything locally in
+        your browser.
+      </p>
+
+      <div class="notice">
+        <strong>Storage:</strong> Progress is saved to <code>localStorage</code> on this device only. Use
+        import/export to back up or transfer your research plan.
+      </div>
+    </section>
+
+    <section class="panel" id="tree" aria-label="Research tree tracker">
+      <div class="panel-head">
+        <div>
+          <h2>Research tree</h2>
+          <p class="muted small" id="statusText">Saved locally.</p>
+        </div>
+        <div class="panel-actions">
+          <button class="btn ghost" id="resetProgress" type="button">Reset progress</button>
+        </div>
+      </div>
+
+      <div class="filters">
+        <div class="control">
+          <label class="label" for="search">Search branches</label>
+          <input class="input" id="search" type="search" placeholder="Search by branch name…" autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="tree-grid" id="treeGrid"></div>
+
+      <div class="empty" id="emptyState" hidden>
+        <h3>No branches found</h3>
+        <p class="muted">Try a different search term.</p>
+      </div>
+    </section>
+
+    <section class="panel" id="bonus" aria-label="Total bonus summary">
+      <div class="panel-head">
+        <div>
+          <h2>Total bonus</h2>
+          <p class="muted small">Store your combined research bonuses for quick reference.</p>
+        </div>
+        <div class="panel-actions">
+          <button class="btn ghost" id="resetBonuses" type="button">Reset bonuses</button>
+        </div>
+      </div>
+
+      <div class="bonus-grid" id="bonusGrid"></div>
+    </section>
+
+    <section class="panel" id="import" aria-label="Import and export">
+      <div class="panel-head">
+        <h2>Backup & transfer</h2>
+        <p class="muted small">
+          Export JSON to back up your research plan or import it on another device. Import replaces your
+          current progress and bonuses.
+        </p>
+      </div>
+
+      <div class="io-grid">
+        <div class="io-card">
+          <h3>Export</h3>
+          <p class="muted">Download a JSON snapshot.</p>
+          <div class="io-actions">
+            <button class="btn primary" id="exportBtn" type="button">Download JSON</button>
+          </div>
+        </div>
+
+        <div class="io-card">
+          <h3>Import</h3>
+          <p class="muted">Load a previously exported JSON file.</p>
+          <div class="io-actions">
+            <input class="file" id="importFile" type="file" accept="application/json" />
+            <button class="btn" id="importBtn" type="button">Import (replace data)</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span class="muted small">© <span id="year"></span> Kingshot Labs</span>
+      <a class="muted small" href="../">Back to tools</a>
+    </div>
+  </footer>
+
+  <script src="script.js" defer></script>
+</body>
+</html>

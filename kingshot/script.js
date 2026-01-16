@@ -54,6 +54,15 @@
       cta: "Open",
       disabled: false,
     },
+    {
+      title: "Research Planner",
+      status: "live",
+      desc: "Track Growth, Economy, and Battle research progression with local save and import/export support.",
+      tags: ["research", "planner", "progress"],
+      href: "research/",
+      cta: "Open",
+      disabled: false,
+    },
 
 
     {
