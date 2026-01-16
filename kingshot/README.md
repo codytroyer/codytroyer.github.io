@@ -15,8 +15,11 @@ This is a static site hosted on GitHub Pages as part of `codytroyer.github.io`.
 A landing page that describes the project, lists tools, and provides basic navigation.
 
 ### Heroes Roster (`/kingshot/heroes/`)
-A local-first roster editor so players can enter heroes once and reuse them across tools.
+A local-first roster editor so players can enter heroes once and reuse them across tools. It ships with a
+default roster of 28 heroes, keeps rarity and hero type hardcoded per hero, and lets players quickly update
+their levels, stars, and skill values.
 
 - Data is stored locally in the browser using `localStorage`
 - Export/Import JSON is supported for backup and transfer between devices
 - No accounts, no server, and no credential collection
+- A developer-only debug panel can be enabled by setting `localStorage.setItem("kingshot:heroes:debug", "1")`
