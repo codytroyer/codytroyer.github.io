@@ -37,8 +37,9 @@
       </div>
       <h1>Heroes Roster</h1>
       <p class="muted lead">
-        Enter your heroes once and reuse them across Kingshot tools. Data is stored locally in your browser
-        (no accounts, no server). You can export a backup anytime.
+        Your roster starts with 28 default heroes. Mark which ones you have unlocked and fill in their
+        levels, stars, and skill levels for reuse across Kingshot tools. Data is stored locally in your browser
+        (no accounts, no server).
       </p>
 
       <div class="notice">
@@ -51,21 +52,14 @@
       <div class="panel-head">
         <h2>Your heroes</h2>
         <div class="panel-actions">
-          <button class="btn" id="addHero" type="button">Add hero</button>
-          <button class="btn ghost" id="clearAll" type="button">Clear all</button>
+          <button class="btn ghost" id="resetRoster" type="button">Reset defaults</button>
         </div>
       </div>
 
       <div class="filters">
         <div class="control">
           <label class="label" for="search">Search</label>
-          <input class="input" id="search" type="search" placeholder="Search by name, tag, notes…" autocomplete="off" />
-        </div>
-        <div class="control">
-          <label class="label" for="tagFilter">Tag</label>
-          <select class="select" id="tagFilter">
-            <option value="all">All</option>
-          </select>
+          <input class="input" id="search" type="search" placeholder="Search by hero name…" autocomplete="off" />
         </div>
       </div>
 
@@ -74,11 +68,15 @@
           <thead>
             <tr>
               <th>Name</th>
+              <th class="num">Unlocked</th>
               <th class="num">Level</th>
               <th class="num">Stars</th>
-              <th>Tags</th>
-              <th>Notes</th>
-              <th class="actions-col"></th>
+              <th class="num">Conquest 1</th>
+              <th class="num">Conquest 2</th>
+              <th class="num">Conquest 3</th>
+              <th class="num">Expedition 1</th>
+              <th class="num">Expedition 2</th>
+              <th class="num">Expedition 3</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -87,7 +85,7 @@
 
       <div class="empty" id="emptyState" hidden>
         <h3>No heroes yet</h3>
-        <p class="muted">Click “Add hero” to create your roster.</p>
+        <p class="muted">Your default roster will appear here.</p>
       </div>
     </section>
 
@@ -134,52 +132,6 @@
     </div>
   </footer>
 
-  <dialog class="dialog" id="heroDialog" aria-label="Add or edit hero">
-    <form method="dialog" class="dialog-card" id="heroForm">
-      <div class="dialog-head">
-        <h3 id="dialogTitle">Add hero</h3>
-        <button class="icon-btn" value="cancel" aria-label="Close">×</button>
-      </div>
-
-      <div class="grid">
-        <div class="control">
-          <label class="label" for="name">Name</label>
-          <input class="input" id="name" name="name" required maxlength="60" placeholder="Hero name" />
-        </div>
-
-        <div class="row">
-          <div class="control">
-            <label class="label" for="level">Level</label>
-            <input class="input" id="level" name="level" type="number" min="1" max="999" value="1" />
-          </div>
-
-          <div class="control">
-            <label class="label" for="stars">Stars</label>
-            <input class="input" id="stars" name="stars" type="number" min="0" max="20" value="0" />
-          </div>
-        </div>
-
-        <div class="control">
-          <label class="label" for="tags">Tags (comma-separated)</label>
-          <input class="input" id="tags" name="tags" placeholder="e.g., support, DPS, arena" />
-        </div>
-
-        <div class="control">
-          <label class="label" for="notes">Notes</label>
-          <textarea class="textarea" id="notes" name="notes" rows="3" placeholder="Anything you want to remember..."></textarea>
-        </div>
-      </div>
-
-      <div class="dialog-actions">
-        <button class="btn" value="cancel" type="button" id="cancelBtn">Cancel</button>
-        <button class="btn primary" value="default" type="submit" id="saveBtn">Save</button>
-      </div>
-
-      <input type="hidden" id="heroId" name="heroId" />
-    </form>
-  </dialog>
-
   <script src="script.js" defer></script>
 </body>
 </html>
-

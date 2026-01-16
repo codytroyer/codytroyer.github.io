@@ -2,8 +2,39 @@
   const root = document.documentElement;
 
   // Storage keys (versioned so you can migrate later)
-  const STORAGE_KEY = "kingshot:heroes:v1";
+  const STORAGE_KEY = "kingshot:heroes:v2";
+  const LEGACY_STORAGE_KEY = "kingshot:heroes:v1";
   const THEME_KEY = "kingshot-theme";
+  const DEFAULT_HEROES = [
+    { name: "Rosa", rarity: "SSR" },
+    { name: "Alcar", rarity: "SSR" },
+    { name: "Zoe", rarity: "SSR" },
+    { name: "Jabel", rarity: "SSR" },
+    { name: "Petra", rarity: "SSR" },
+    { name: "Long Fei", rarity: "SSR" },
+    { name: "Hilde", rarity: "SSR" },
+    { name: "Marlin", rarity: "SSR" },
+    { name: "Amadeus", rarity: "SSR" },
+    { name: "Jaeger", rarity: "SSR" },
+    { name: "Margot", rarity: "SSR" },
+    { name: "Eric", rarity: "SSR" },
+    { name: "Saul", rarity: "SSR" },
+    { name: "Helga", rarity: "SSR" },
+    { name: "Vivian", rarity: "SSR" },
+    { name: "Thrud", rarity: "SSR" },
+    { name: "Diana", rarity: "SR" },
+    { name: "Chenko", rarity: "SR" },
+    { name: "Quinn", rarity: "SR" },
+    { name: "Gordon", rarity: "SR" },
+    { name: "Howard", rarity: "SR" },
+    { name: "Fahd", rarity: "SR" },
+    { name: "Amane", rarity: "SR" },
+    { name: "Yeonwoo", rarity: "SR" },
+    { name: "Forrest", rarity: "R" },
+    { name: "Olive", rarity: "R" },
+    { name: "Edwin", rarity: "R" },
+    { name: "Seth", rarity: "R" },
+  ];
 
   // Elements
   const yearEl = document.getElementById("year");
@@ -12,28 +43,14 @@
   const tbody = document.getElementById("tbody");
   const emptyState = document.getElementById("emptyState");
 
-  const addHeroBtn = document.getElementById("addHero");
-  const clearAllBtn = document.getElementById("clearAll");
+  const resetRosterBtn = document.getElementById("resetRoster");
 
   const searchEl = document.getElementById("search");
-  const tagFilterEl = document.getElementById("tagFilter");
 
   const exportBtn = document.getElementById("exportBtn");
   const importFileEl = document.getElementById("importFile");
   const importBtn = document.getElementById("importBtn");
 
-  const dialog = document.getElementById("heroDialog");
-  const form = document.getElementById("heroForm");
-  const dialogTitle = document.getElementById("dialogTitle");
-
-  const heroIdEl = document.getElementById("heroId");
-  const nameEl = document.getElementById("name");
-  const levelEl = document.getElementById("level");
-  const starsEl = document.getElementById("stars");
-  const tagsEl = document.getElementById("tags");
-  const notesEl = document.getElementById("notes");
-
-  const cancelBtn = document.getElementById("cancelBtn");
   const toggleThemeBtn = document.getElementById("toggleTheme");
 
   const statusText = document.getElementById("statusText");
@@ -57,40 +74,77 @@
 
   // --- Data model ---
   // Hero shape:
-  // { id, name, level, stars, tags: string[], notes, updatedAt }
+  // { id, name, rarity, unlocked, level, stars, skills: { conquest: number[], expedition: number[] }, updatedAt }
   function nowIso() {
     return new Date().toISOString();
   }
 
-  function randomId() {
-    // Not cryptographic; sufficient for client-only IDs
-    return Math.random().toString(16).slice(2) + "-" + Date.now().toString(16);
+  function buildDefaultRoster() {
+    return DEFAULT_HEROES.map((hero, index) => {
+      const id = `hero-${index + 1}`;
+      return sanitizeHero({
+        id,
+        name: hero.name,
+        rarity: hero.rarity,
+        unlocked: false,
+        level: 1,
+        stars: 0,
+        skills: {
+          conquest: [],
+          expedition: [],
+        },
+        updatedAt: nowIso(),
+      });
+    });
   }
 
-  function normalizeTags(input) {
-    if (!input) return [];
-    return input
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean)
-      .map((t) => t.toLowerCase());
+  function skillLimitsForRarity(rarity) {
+    const key = String(rarity || "R").toLowerCase();
+    if (key === "sr") return { conquest: 3, expedition: 2 };
+    if (key === "ssr") return { conquest: 3, expedition: 3 };
+    return { conquest: 2, expedition: 2 };
+  }
+
+  function normalizeSkillGroup(input, limit) {
+    const values = Array.isArray(input) ? input : [];
+    const normalized = values.map((value) => {
+      const num = Number(value);
+      if (!Number.isFinite(num)) return 0;
+      return Math.max(0, Math.floor(num));
+    });
+    while (normalized.length < limit) normalized.push(0);
+    return normalized.slice(0, limit);
+  }
+
+  function normalizeSkills(input, rarity) {
+    const limits = skillLimitsForRarity(rarity);
+    if (Array.isArray(input)) {
+      return {
+        conquest: normalizeSkillGroup(input.slice(0, 3), limits.conquest),
+        expedition: normalizeSkillGroup(input.slice(3, 6), limits.expedition),
+      };
+    }
+    const conquest = normalizeSkillGroup(input?.conquest, limits.conquest);
+    const expedition = normalizeSkillGroup(input?.expedition, limits.expedition);
+    return { conquest, expedition };
   }
 
   function sanitizeHero(h) {
     const name = String(h.name || "").trim().slice(0, 60);
+    const rarity = String(h.rarity || "R").trim().slice(0, 20) || "R";
     const level = Number.isFinite(Number(h.level)) ? Math.max(1, Math.floor(Number(h.level))) : 1;
     const stars = Number.isFinite(Number(h.stars)) ? Math.max(0, Math.floor(Number(h.stars))) : 0;
-    const tags = Array.isArray(h.tags) ? h.tags.map((x) => String(x).trim().toLowerCase()).filter(Boolean) : normalizeTags(h.tags);
-    const notes = String(h.notes || "").trim().slice(0, 500);
-    const id = String(h.id || randomId());
+    const unlocked = Boolean(h.unlocked);
+    const skills = normalizeSkills(h.skills, rarity);
+    const id = String(h.id || "");
     const updatedAt = String(h.updatedAt || nowIso());
 
-    return { id, name, level, stars, tags, notes, updatedAt };
+    return { id, name, rarity, unlocked, level, stars, skills, updatedAt };
   }
 
-  function loadRoster() {
+  function loadRosterFromKey(key) {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(key);
       if (!raw) return [];
       const parsed = JSON.parse(raw);
       if (!Array.isArray(parsed)) return [];
@@ -100,11 +154,37 @@
     }
   }
 
+  function loadRoster() {
+    const current = loadRosterFromKey(STORAGE_KEY);
+    if (current.length) return current;
+    return loadRosterFromKey(LEGACY_STORAGE_KEY);
+  }
+
   function saveRoster(list) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
   }
 
-  let roster = loadRoster();
+  function mergeWithDefaults(saved) {
+    const defaults = buildDefaultRoster();
+    const byId = new Map(saved.map((hero) => [hero.id, hero]));
+    const byName = new Map(saved.map((hero) => [hero.name, hero]));
+    return defaults.map((hero) => {
+      const match = byId.get(hero.id) || byName.get(hero.name);
+      if (!match) return hero;
+      return sanitizeHero({
+        ...hero,
+        ...match,
+        id: hero.id,
+        name: hero.name,
+      });
+    });
+  }
+
+  const loadedRoster = loadRoster();
+  let roster = mergeWithDefaults(loadedRoster);
+  if (!localStorage.getItem(STORAGE_KEY)) {
+    saveRoster(roster);
+  }
 
   // --- Rendering ---
   function escapeHtml(s) {
@@ -118,61 +198,109 @@
 
   function rosterForView() {
     const q = (searchEl?.value || "").trim().toLowerCase();
-    const tag = tagFilterEl?.value || "all";
 
     return roster
       .filter((h) => {
         if (!q) return true;
-        const hay = [h.name, h.notes, (h.tags || []).join(" "), String(h.level), String(h.stars)].join(" ").toLowerCase();
+        const hay = [h.name].join(" ").toLowerCase();
         return hay.includes(q);
       })
-      .filter((h) => {
-        if (tag === "all") return true;
-        return (h.tags || []).includes(tag);
-      })
       .sort((a, b) => a.name.localeCompare(b.name));
-  }
-
-  function updateTagFilterOptions() {
-    if (!tagFilterEl) return;
-
-    const allTags = new Set();
-    for (const h of roster) for (const t of (h.tags || [])) allTags.add(t);
-
-    const current = tagFilterEl.value || "all";
-    const tags = Array.from(allTags).sort();
-
-    tagFilterEl.innerHTML = `<option value="all">All</option>` + tags.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
-
-    // restore selection if possible
-    if (tags.includes(current)) tagFilterEl.value = current;
-    else tagFilterEl.value = "all";
   }
 
   function render() {
     if (yearEl) yearEl.textContent = String(new Date().getFullYear());
     if (statusText) statusText.textContent = `Saved locally. Heroes: ${roster.length}.`;
 
-    updateTagFilterOptions();
-
     const view = rosterForView();
-
+    const skillsOptions = Array.from({ length: 6 }, (_, value) => value);
+    const starsOptions = Array.from({ length: 6 }, (_, value) => value);
+    const levelOptions = Array.from({ length: 80 }, (_, index) => index + 1);
     if (tbody) {
       tbody.innerHTML = view.map((h) => {
-        const tags = (h.tags || []).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join(" ");
-        const notes = escapeHtml(h.notes || "");
+        const lockedClass = h.unlocked ? "" : " is-locked";
+        const disabledAttr = h.unlocked ? "" : "disabled";
+        const rarity = h.rarity || "R";
+        const rarityClass = `rarity-${rarity.toLowerCase()}`;
+        const limits = skillLimitsForRarity(rarity);
+        const skills = normalizeSkills(h.skills, rarity);
+        const conquestDisabled = (index) => (!h.unlocked || index >= limits.conquest) ? "disabled" : "";
+        const expeditionDisabled = (index) => (!h.unlocked || index >= limits.expedition) ? "disabled" : "";
+        const conquestValue = (index) => skills.conquest[index];
+        const expeditionValue = (index) => skills.expedition[index];
         return `
-          <tr>
-            <td><strong>${escapeHtml(h.name)}</strong></td>
-            <td class="num">${escapeHtml(h.level)}</td>
-            <td class="num">${escapeHtml(h.stars)}</td>
-            <td>${tags || `<span class="muted">—</span>`}</td>
-            <td>${notes || `<span class="muted">—</span>`}</td>
-            <td class="actions-col">
-              <div class="row-actions">
-                <button class="btn" type="button" data-action="edit" data-id="${escapeHtml(h.id)}">Edit</button>
-                <button class="btn danger" type="button" data-action="delete" data-id="${escapeHtml(h.id)}">Delete</button>
-              </div>
+          <tr class="${lockedClass.trim()}" data-id="${escapeHtml(h.id)}">
+            <td><strong class="${escapeHtml(rarityClass)}">${escapeHtml(h.name)}</strong></td>
+            <td class="num">
+              <input class="checkbox" type="checkbox" data-field="unlocked" ${h.unlocked ? "checked" : ""} />
+            </td>
+            <td class="num">
+              <select class="select select-sm" data-field="level" ${disabledAttr}>
+                ${levelOptions.map((value) => `
+                  <option value="${value}" ${value === Number(h.level) ? "selected" : ""}>${value}</option>
+                `).join("")}
+              </select>
+            </td>
+            <td class="num">
+              <select class="select select-sm" data-field="stars" ${disabledAttr}>
+                ${starsOptions.map((value) => `
+                  <option value="${value}" ${value === Number(h.stars) ? "selected" : ""}>${value}</option>
+                `).join("")}
+              </select>
+            </td>
+            <td class="num">
+              ${limits.conquest >= 1 ? `
+                <select class="select select-sm" data-field="conquest1" ${conquestDisabled(0)}>
+                  ${skillsOptions.map((value) => `
+                    <option value="${value}" ${value === Number(conquestValue(0)) ? "selected" : ""}>${value}</option>
+                  `).join("")}
+                </select>
+              ` : `<span class="muted">—</span>`}
+            </td>
+            <td class="num">
+              ${limits.conquest >= 2 ? `
+                <select class="select select-sm" data-field="conquest2" ${conquestDisabled(1)}>
+                  ${skillsOptions.map((value) => `
+                    <option value="${value}" ${value === Number(conquestValue(1)) ? "selected" : ""}>${value}</option>
+                  `).join("")}
+                </select>
+              ` : `<span class="muted">—</span>`}
+            </td>
+            <td class="num">
+              ${limits.conquest >= 3 ? `
+                <select class="select select-sm" data-field="conquest3" ${conquestDisabled(2)}>
+                  ${skillsOptions.map((value) => `
+                    <option value="${value}" ${value === Number(conquestValue(2)) ? "selected" : ""}>${value}</option>
+                  `).join("")}
+                </select>
+              ` : `<span class="muted">—</span>`}
+            </td>
+            <td class="num">
+              ${limits.expedition >= 1 ? `
+                <select class="select select-sm" data-field="expedition1" ${expeditionDisabled(0)}>
+                  ${skillsOptions.map((value) => `
+                    <option value="${value}" ${value === Number(expeditionValue(0)) ? "selected" : ""}>${value}</option>
+                  `).join("")}
+                </select>
+              ` : `<span class="muted">—</span>`}
+            </td>
+            <td class="num">
+              ${limits.expedition >= 2 ? `
+                <select class="select select-sm" data-field="expedition2" ${expeditionDisabled(1)}>
+                  ${skillsOptions.map((value) => `
+                    <option value="${value}" ${value === Number(expeditionValue(1)) ? "selected" : ""}>${value}</option>
+                  `).join("")}
+                </select>
+              ` : `<span class="muted">—</span>`}
+            </td>
+            <td class="num">
+              ${limits.expedition >= 3 ? `
+                <select class="select select-sm" data-field="expedition3" ${expeditionDisabled(2)}>
+                  ${skillsOptions.map((value) => `
+                    <option value="${value}" ${value === Number(expeditionValue(2)) ? "selected" : ""}>${value}</option>
+                  `).join("")}
+                </select>
+              ` : `<span class="muted">—</span>`}
             </td>
           </tr>
         `;
@@ -191,106 +319,57 @@
     }
   }
 
-  // --- Dialog helpers ---
-  function openAddDialog() {
-    heroIdEl.value = "";
-    nameEl.value = "";
-    levelEl.value = "1";
-    starsEl.value = "0";
-    tagsEl.value = "";
-    notesEl.value = "";
-    dialogTitle.textContent = "Add hero";
-    dialog.showModal();
-    nameEl.focus();
-  }
-
-  function openEditDialog(id) {
+  function updateHeroField(id, field, value) {
     const hero = roster.find((h) => h.id === id);
     if (!hero) return;
-
-    heroIdEl.value = hero.id;
-    nameEl.value = hero.name;
-    levelEl.value = String(hero.level);
-    starsEl.value = String(hero.stars);
-    tagsEl.value = (hero.tags || []).join(", ");
-    notesEl.value = hero.notes || "";
-    dialogTitle.textContent = "Edit hero";
-    dialog.showModal();
-    nameEl.focus();
-  }
-
-  function upsertHeroFromForm() {
-    const id = (heroIdEl.value || "").trim();
-    const hero = sanitizeHero({
-      id: id || randomId(),
-      name: nameEl.value,
-      level: levelEl.value,
-      stars: starsEl.value,
-      tags: normalizeTags(tagsEl.value),
-      notes: notesEl.value,
-      updatedAt: nowIso(),
-    });
-
-    if (!hero.name) return;
-
-    const idx = roster.findIndex((h) => h.id === hero.id);
-    if (idx >= 0) roster[idx] = hero;
-    else roster.push(hero);
-
+    if (field === "unlocked") {
+      hero.unlocked = Boolean(value);
+    } else if (field === "level") {
+      hero.level = Math.max(1, Math.floor(Number(value) || 1));
+    } else if (field === "stars") {
+      hero.stars = Math.max(0, Math.floor(Number(value) || 0));
+    } else if (field.startsWith("conquest") || field.startsWith("expedition")) {
+      const isConquest = field.startsWith("conquest");
+      const idx = Number(field.replace(isConquest ? "conquest" : "expedition", "")) - 1;
+      if (Number.isNaN(idx) || idx < 0) return;
+      const updated = normalizeSkills(hero.skills, hero.rarity);
+      const group = isConquest ? updated.conquest : updated.expedition;
+      if (idx >= group.length) return;
+      group[idx] = Math.max(0, Math.floor(Number(value) || 0));
+      hero.skills = updated;
+    }
+    hero.updatedAt = nowIso();
     saveRoster(roster);
-    render();
   }
 
   // --- Events ---
-  if (addHeroBtn) addHeroBtn.addEventListener("click", openAddDialog);
-
-  if (cancelBtn) cancelBtn.addEventListener("click", () => dialog.close());
-
-  if (form) {
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      upsertHeroFromForm();
-      dialog.close();
-    });
-  }
-
   if (tbody) {
-    tbody.addEventListener("click", (e) => {
+    tbody.addEventListener("change", (e) => {
       const target = e.target;
-      if (!(target instanceof HTMLElement)) return;
+      if (!(target instanceof HTMLInputElement || target instanceof HTMLSelectElement)) return;
+      const row = target.closest("tr");
+      const id = row?.getAttribute("data-id");
+      const field = target.getAttribute("data-field");
+      if (!id || !field) return;
 
-      const action = target.getAttribute("data-action");
-      const id = target.getAttribute("data-id");
-      if (!action || !id) return;
-
-      if (action === "edit") {
-        openEditDialog(id);
-      } else if (action === "delete") {
-        const hero = roster.find((h) => h.id === id);
-        const label = hero?.name ? ` "${hero.name}"` : "";
-        const ok = confirm(`Delete hero${label}? This cannot be undone.`);
-        if (!ok) return;
-
-        roster = roster.filter((h) => h.id !== id);
-        saveRoster(roster);
-        render();
-      }
+      const value = target instanceof HTMLInputElement && target.type === "checkbox" ? target.checked : target.value;
+      updateHeroField(id, field, value);
+      render();
     });
   }
 
-  if (clearAllBtn) {
-    clearAllBtn.addEventListener("click", () => {
-      const ok = confirm("Clear ALL heroes? This cannot be undone.");
+  if (resetRosterBtn) {
+    resetRosterBtn.addEventListener("click", () => {
+      const ok = confirm("Reset all heroes back to default locked values?");
       if (!ok) return;
 
-      roster = [];
+      roster = buildDefaultRoster();
       saveRoster(roster);
       render();
     });
   }
 
   if (searchEl) searchEl.addEventListener("input", render);
-  if (tagFilterEl) tagFilterEl.addEventListener("change", render);
 
   // Export / Import
   function download(filename, text) {
@@ -308,7 +387,7 @@
   if (exportBtn) {
     exportBtn.addEventListener("click", () => {
       const payload = {
-        schema: "kingshot:heroes:v1",
+        schema: "kingshot:heroes:v2",
         exportedAt: nowIso(),
         heroes: roster,
       };
@@ -342,7 +421,7 @@
         const ok = confirm("Import will REPLACE your current roster. Continue?");
         if (!ok) return;
 
-        roster = heroes.map(sanitizeHero);
+        roster = mergeWithDefaults(heroes.map(sanitizeHero));
         saveRoster(roster);
         render();
 
@@ -357,4 +436,3 @@
   // Initial render
   render();
 })();
-
