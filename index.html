@@ -1,56 +1,48 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Page</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-        }
-        p {
-            color: #666;
-            line-height: 1.6;
-        }
-        .button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Cody Troyer — links and projects." />
+  <title>Cody's Hub</title>
+  <link rel="stylesheet" href="styles/style.css">
 </head>
+
 <body>
-    <div class="container">
-        <h1>Test Page</h1>
-        <p>This is a basic test HTML page.</p>
-        <p>It includes:</p>
-        <ul>
-            <li>Proper HTML5 structure</li>
-            <li>Responsive meta viewport tag</li>
-            <li>Basic styling</li>
-            <li>Interactive elements</li>
-        </ul>
-        <button class="button" onclick="alert('Button clicked!')">Click Me</button>
-    </div>
+  <main class="wrap">
+    <header>
+      <h1 class="title">Cody's Hub</h1>
+      <p class="subtitle">
+        A simple, organized landing page that links to nested projects hosted on GitHub Pages.
+      </p>
+    </header>
+
+    <section class="grid">
+      <article class="card half">
+        <h2>Kingshot</h2>
+        <p>A dedicated sub-site with its own HTML/CSS/JS.</p>
+        <div class="actions">
+          <!-- IMPORTANT: relative link to subfolder -->
+          <a class="btn" href="kingshot/">Open Kingshot →</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>About</h2>
+        <p>
+          This site is intentionally minimal: one root landing page plus nested directories per project.
+          It avoids absolute paths so it works cleanly on GitHub Pages.
+        </p>
+      </article>
+    </section>
+
+    <footer>
+      <span>© <span id="year"></span> Cody Troyer</span>
+      <span>Hosted on GitHub Pages</span>
+    </footer>
+  </main>
+
+  <script src="scripts/script.js" defer></script>
 </body>
 </html>
+
