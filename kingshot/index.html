@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Kingshot strategy tools and calculators built for the community." />
+  <title>Kingshot Tools</title>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="../" aria-label="Back to homepage">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-text">Kingshot Labs</span>
+      </a>
+
+      <nav class="header-nav" aria-label="Primary">
+        <a class="nav-link" href="../">Home</a>
+        <a class="nav-link" href="#tools">Tools</a>
+        <a class="nav-link" href="#roadmap">Roadmap</a>
+        <a class="nav-link" href="#about">About</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn ghost" id="toggleTheme" type="button" aria-label="Toggle theme">
+          Theme
+        </button>
+        <a class="btn primary" href="#tools">Explore tools</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="hero-copy">
+          <div class="badge-row">
+            <span class="badge">Community tools</span>
+            <span class="badge subtle" id="buildBadge">Static site</span>
+          </div>
+
+          <h1 class="hero-title">Strategy tools for Kingshot players</h1>
+
+          <p class="hero-lead">
+            Kingshot has real depth. This site is a growing set of calculators, planners, and optimization
+            tools to help players make better decisions—shared openly so the community can benefit.
+          </p>
+
+          <div class="hero-cta">
+            <a class="btn primary" href="#tools">View tools</a>
+            <a class="btn" href="#about">How it works</a>
+          </div>
+
+          <p class="hero-footnote">
+            Note: This is a fan/community project. No game credentials required. No trackers.
+          </p>
+        </div>
+
+        <aside class="hero-panel" aria-label="Quick stats">
+          <div class="panel-card">
+            <div class="panel-kpi">
+              <div class="kpi-label">Status</div>
+              <div class="kpi-value" id="siteStatus">Live</div>
+              <div class="kpi-sub" id="statusText">Loading…</div>
+            </div>
+
+            <div class="panel-divider" role="separator"></div>
+
+            <div class="panel-list">
+              <div class="panel-item">
+                <span class="dot ok" aria-hidden="true"></span>
+                <span>Static hosting (GitHub Pages)</span>
+              </div>
+              <div class="panel-item">
+                <span class="dot ok" aria-hidden="true"></span>
+                <span>Local-first calculations</span>
+              </div>
+              <div class="panel-item">
+                <span class="dot warn" aria-hidden="true"></span>
+                <span>Tools rolling out incrementally</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="tools">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Tools</h2>
+            <p class="muted">
+              Browse what’s available now, what’s in progress, and what’s planned. Use search and filters
+              to find what you need quickly.
+            </p>
+          </div>
+
+          <div class="controls" aria-label="Tool filters">
+            <div class="control">
+              <label class="control-label" for="search">Search</label>
+              <input id="search" type="search" class="input" placeholder="e.g., rally, upgrade, resource…" autocomplete="off" />
+            </div>
+
+            <div class="control">
+              <label class="control-label" for="statusFilter">Status</label>
+              <select id="statusFilter" class="select">
+                <option value="all">All</option>
+                <option value="live">Live</option>
+                <option value="beta">Beta</option>
+                <option value="wip">In progress</option>
+                <option value="planned">Planned</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="tool-grid" id="toolGrid" aria-live="polite"></div>
+
+        <div class="empty" id="emptyState" hidden>
+          <h3>No matches</h3>
+          <p class="muted">Try a broader search term or switch status to “All”.</p>
+          <button class="btn" id="resetFilters" type="button">Reset filters</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt" id="roadmap">
+      <div class="container">
+        <div class="section-head compact">
+          <div>
+            <h2>Roadmap</h2>
+            <p class="muted">
+              The immediate focus is “decision leverage” tools: things that save time and reduce mistakes
+              under resource constraints.
+            </p>
+          </div>
+        </div>
+
+        <div class="roadmap">
+          <article class="card">
+            <h3>Phase 1 — Foundations</h3>
+            <ul class="list">
+              <li>Core calculators (resource, upgrades, timing)</li>
+              <li>Consistent data model + versioning</li>
+              <li>Transparent assumptions and formulas</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>Phase 2 — Optimization</h3>
+            <ul class="list">
+              <li>Strategy planners and “what-if” comparisons</li>
+              <li>Constraint optimization (budget, time, event windows)</li>
+              <li>Shareable builds/plans</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>Phase 3 — Community Scale</h3>
+            <ul class="list">
+              <li>Community-sourced datasets (with validation)</li>
+              <li>Contribution guidelines + issue templates</li>
+              <li>Open methodology and reproducible results</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="about">
+      <div class="container">
+        <div class="about">
+          <article class="card">
+            <h2>About this project</h2>
+            <p class="muted">
+              The goal is practical: build tools that help players make better choices with limited resources.
+              Everything here is designed to be understandable, inspectable, and community-friendly.
+            </p>
+
+            <div class="callouts">
+              <div class="callout">
+                <h3>Transparency</h3>
+                <p class="muted">Formulas and assumptions should be visible and easy to audit.</p>
+              </div>
+              <div class="callout">
+                <h3>Local-first</h3>
+                <p class="muted">Prefer computations in the browser. Avoid collecting player data.</p>
+              </div>
+              <div class="callout">
+                <h3>Iterate quickly</h3>
+                <p class="muted">Start small, ship improvements, and validate with player feedback.</p>
+              </div>
+            </div>
+
+            <div class="about-actions">
+              <a class="btn" href="../">Back to home</a>
+              <a class="btn primary" href="#tools">Browse tools</a>
+            </div>
+          </article>
+
+          <aside class="card">
+            <h2>Feedback loop</h2>
+            <p class="muted">
+              If you want contributions and requests later, the best path is to add a public issue tracker in
+              the repo and link it here.
+            </p>
+
+            <div class="info-box">
+              <div class="info-title">Suggested next steps</div>
+              <ul class="list">
+                <li>Enable GitHub Issues</li>
+                <li>Add a “request a tool” issue template</li>
+                <li>Define data sources and update cadence</li>
+              </ul>
+            </div>
+
+            <p class="muted small">
+              If you share a preferred way for players to submit requests (Issues, Discord, etc.), I can
+              integrate that into this panel cleanly.
+            </p>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-left">
+        <div class="footer-brand">Kingshot Labs</div>
+        <div class="muted small">Community-built tools for strategy optimization.</div>
+      </div>
+      <div class="footer-right">
+        <span class="muted small">© <span id="year"></span> Cody Troyer</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
+
