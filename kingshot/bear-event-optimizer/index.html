@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Optimize your Bear event rallies with capacity-aware troop splits." />
+  <title>Bear Event Optimizer | Kingshot Labs</title>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="../" aria-label="Back to Kingshot tools">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-text">Kingshot Labs</span>
+      </a>
+
+      <nav class="header-nav" aria-label="Primary">
+        <a class="nav-link" href="../">Tools</a>
+        <a class="nav-link" href="#inputs">Inputs</a>
+        <a class="nav-link" href="#plan">Rally plan</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn ghost" id="toggleTheme" type="button">Theme</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main">
+    <section class="hero">
+      <div class="badge-row">
+        <span class="badge">New tool</span>
+        <span class="badge subtle">Bear event optimizer</span>
+      </div>
+      <h1>Bear Event Optimizer</h1>
+      <p class="muted lead">
+        Plug in your troop inventory and rally capacity to generate a Bear rally + squad breakdown.
+        This optimizer prioritizes archers first, then splits the remaining capacity between cavalry and
+        infantry. Use it to quickly see how many troops to deploy per rally.
+      </p>
+      <div class="notice">
+        <strong>Assumptions:</strong> At most one Bear rally is led, and up to six squads are supported.
+        If your troop inventory is smaller than your total deployment capacity, the plan scales down evenly
+        and flags unfilled slots.
+      </div>
+    </section>
+
+    <section class="panel" id="inputs" aria-label="Troops and capacity inputs">
+      <div class="panel-head">
+        <h2>1) Your troops & capacity</h2>
+        <p class="muted small">Enter current troop counts and rally sizes.</p>
+      </div>
+
+      <div class="grid two">
+        <div class="card">
+          <h3>Troop inventory</h3>
+          <div class="control">
+            <label class="label" for="infantry">Infantry available</label>
+            <input class="input" id="infantry" type="number" min="0" value="120000" />
+            <div class="bar" aria-hidden="true">
+              <span class="fill" id="infantryBar"></span>
+            </div>
+          </div>
+          <div class="control">
+            <label class="label" for="cavalry">Cavalry available</label>
+            <input class="input" id="cavalry" type="number" min="0" value="120000" />
+            <div class="bar" aria-hidden="true">
+              <span class="fill" id="cavalryBar"></span>
+            </div>
+          </div>
+          <div class="control">
+            <label class="label" for="archers">Archers available</label>
+            <input class="input" id="archers" type="number" min="0" value="180000" />
+            <div class="bar" aria-hidden="true">
+              <span class="fill" id="archerBar"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Deployment capacity</h3>
+          <div class="control">
+            <label class="label" for="bearCapacity">Bear rally capacity</label>
+            <input class="input" id="bearCapacity" type="number" min="0" value="140000" />
+          </div>
+          <div class="control">
+            <label class="label" for="joinCapacity">Squad capacity (per squad)</label>
+            <input class="input" id="joinCapacity" type="number" min="0" value="80000" />
+          </div>
+          <div class="control">
+            <label class="label" for="joinCount">Squads (1-6)</label>
+            <input class="input" id="joinCount" type="number" min="1" max="6" value="4" />
+          </div>
+          <div class="capacity-card">
+            <div>
+              <span class="label">Total deployment capacity</span>
+              <div class="metric" id="totalCapacity">0</div>
+              <p class="muted small" id="capacityNote">Based on your Bear rally + squads.</p>
+            </div>
+            <div class="bar" aria-hidden="true">
+              <span class="fill" id="capacityBar"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="plan" aria-label="Optimized rally plan">
+      <div class="panel-head">
+        <h2>2) Optimized rally plan</h2>
+        <p class="muted small">Balanced to maximize archers, then split cavalry/infantry. Heroes are pulled from your saved roster.</p>
+      </div>
+
+      <div class="summary">
+        <div class="summary-card">
+          <span class="label">Infantry / Cavalry / Archers</span>
+          <div class="metric" id="percentSplit">0% / 0% / 0%</div>
+          <p class="muted small" id="splitNote">Percent of deployed troops.</p>
+        </div>
+        <div class="summary-card">
+          <span class="label">Troops deployed</span>
+          <div class="metric" id="deployedTotal">0</div>
+          <p class="muted small" id="deployedNote">How many troops are assigned across rallies.</p>
+        </div>
+        <div class="summary-card">
+          <span class="label">Capacity coverage</span>
+          <div class="metric" id="coverage">0%</div>
+          <p class="muted small" id="coverageNote">Unfilled slots if inventory is smaller.</p>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table" aria-label="Rally breakdown">
+          <thead>
+            <tr>
+              <th>Rally type</th>
+              <th class="num">Capacity</th>
+              <th class="num">Infantry</th>
+              <th class="num">Cavalry</th>
+              <th class="num">Archers</th>
+              <th class="num">Heroes</th>
+              <th class="num">Unfilled</th>
+            </tr>
+          </thead>
+          <tbody id="planRows"></tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <h3>How to use this plan</h3>
+        <ul class="list">
+          <li>Use the “Bear rally” row to set your own rally composition.</li>
+          <li>Use the Squad rows for each supporting rally you send.</li>
+          <li>If unfilled slots appear, either lower rally sizes or recruit more troops.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span class="muted small">© <span id="year"></span> Kingshot Labs</span>
+      <a class="muted small" href="../">Back to tools</a>
+    </div>
+  </footer>
+
+  <script src="script.js" defer></script>
+</body>
+</html>

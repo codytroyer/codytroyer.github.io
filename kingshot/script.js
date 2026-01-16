@@ -27,6 +27,15 @@
       cta: "Open",
       disabled: false,
     },
+    {
+      title: "Bear Event Optimizer",
+      status: "live",
+      desc: "Optimize Bear rally and join rally troop splits with archer-first, capacity-aware planning.",
+      tags: ["bear", "rally", "optimizer"],
+      href: "bear-event-optimizer/",
+      cta: "Open",
+      disabled: false,
+    },
 
 
     {
@@ -216,4 +225,3 @@
   // Initial render
   applyFilters();
 })();
-
