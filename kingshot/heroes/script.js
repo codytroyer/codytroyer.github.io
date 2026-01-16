@@ -45,7 +45,7 @@
 
   // --- Data model ---
   // Hero shape:
-  // { id, name, unlocked, level, stars, skills: number[], updatedAt }
+  // { id, name, rarity, unlocked, level, stars, skills: number[], updatedAt }
   function nowIso() {
     return new Date().toISOString();
   }
@@ -57,36 +57,38 @@
       return sanitizeHero({
         id,
         name,
+        rarity: "Common",
         unlocked: false,
-        level: 1,
+        level: 0,
         stars: 0,
-        skills: [1, 1, 1],
+        skills: [0, 0, 0, 0, 0, 0],
         updatedAt: nowIso(),
       });
     });
   }
 
   function normalizeSkills(input) {
-    if (!Array.isArray(input)) return [1, 1, 1];
+    if (!Array.isArray(input)) return [0, 0, 0, 0, 0, 0];
     const values = input.map((value) => {
       const num = Number(value);
-      if (!Number.isFinite(num)) return 1;
-      return Math.max(1, Math.floor(num));
+      if (!Number.isFinite(num)) return 0;
+      return Math.max(0, Math.floor(num));
     });
-    while (values.length < 3) values.push(1);
-    return values.slice(0, 3);
+    while (values.length < 6) values.push(0);
+    return values.slice(0, 6);
   }
 
   function sanitizeHero(h) {
     const name = String(h.name || "").trim().slice(0, 60);
-    const level = Number.isFinite(Number(h.level)) ? Math.max(1, Math.floor(Number(h.level))) : 1;
+    const rarity = String(h.rarity || "Common").trim().slice(0, 20) || "Common";
+    const level = Number.isFinite(Number(h.level)) ? Math.max(0, Math.floor(Number(h.level))) : 0;
     const stars = Number.isFinite(Number(h.stars)) ? Math.max(0, Math.floor(Number(h.stars))) : 0;
     const unlocked = Boolean(h.unlocked);
     const skills = normalizeSkills(h.skills);
     const id = String(h.id || "");
     const updatedAt = String(h.updatedAt || nowIso());
 
-    return { id, name, unlocked, level, stars, skills, updatedAt };
+    return { id, name, rarity, unlocked, level, stars, skills, updatedAt };
   }
 
   function loadRosterFromKey(key) {
@@ -160,12 +162,16 @@
     if (statusText) statusText.textContent = `Saved locally. Heroes: ${roster.length}.`;
 
     const view = rosterForView();
+    const skillsOptions = Array.from({ length: 6 }, (_, value) => value);
+    const starsOptions = Array.from({ length: 6 }, (_, value) => value);
+    const rarityOptions = ["Common", "Rare", "Epic", "Legendary", "Mythic"];
 
     if (tbody) {
       tbody.innerHTML = view.map((h) => {
         const lockedClass = h.unlocked ? "" : " is-locked";
         const disabledAttr = h.unlocked ? "" : "disabled";
         const skills = normalizeSkills(h.skills);
+        const rarity = h.rarity || "Common";
         return `
           <tr class="${lockedClass.trim()}" data-id="${escapeHtml(h.id)}">
             <td><strong>${escapeHtml(h.name)}</strong></td>
@@ -173,19 +179,63 @@
               <input class="checkbox" type="checkbox" data-field="unlocked" ${h.unlocked ? "checked" : ""} />
             </td>
             <td class="num">
-              <input class="input input-sm" type="number" data-field="level" min="1" max="999" value="${escapeHtml(h.level)}" ${disabledAttr} />
+              <select class="select select-sm" data-field="rarity" ${disabledAttr}>
+                ${rarityOptions.map((option) => `
+                  <option value="${escapeHtml(option)}" ${option === rarity ? "selected" : ""}>${escapeHtml(option)}</option>
+                `).join("")}
+              </select>
             </td>
             <td class="num">
-              <input class="input input-sm" type="number" data-field="stars" min="0" max="20" value="${escapeHtml(h.stars)}" ${disabledAttr} />
+              <input class="input input-sm" type="number" data-field="level" min="0" max="80" value="${escapeHtml(h.level)}" ${disabledAttr} />
             </td>
             <td class="num">
-              <input class="input input-sm" type="number" data-field="skill1" min="1" max="10" value="${escapeHtml(skills[0])}" ${disabledAttr} />
+              <select class="select select-sm" data-field="stars" ${disabledAttr}>
+                ${starsOptions.map((value) => `
+                  <option value="${value}" ${value === Number(h.stars) ? "selected" : ""}>${value}</option>
+                `).join("")}
+              </select>
             </td>
             <td class="num">
-              <input class="input input-sm" type="number" data-field="skill2" min="1" max="10" value="${escapeHtml(skills[1])}" ${disabledAttr} />
+              <select class="select select-sm" data-field="skill1" ${disabledAttr}>
+                ${skillsOptions.map((value) => `
+                  <option value="${value}" ${value === Number(skills[0]) ? "selected" : ""}>${value}</option>
+                `).join("")}
+              </select>
             </td>
             <td class="num">
-              <input class="input input-sm" type="number" data-field="skill3" min="1" max="10" value="${escapeHtml(skills[2])}" ${disabledAttr} />
+              <select class="select select-sm" data-field="skill2" ${disabledAttr}>
+                ${skillsOptions.map((value) => `
+                  <option value="${value}" ${value === Number(skills[1]) ? "selected" : ""}>${value}</option>
+                `).join("")}
+              </select>
+            </td>
+            <td class="num">
+              <select class="select select-sm" data-field="skill3" ${disabledAttr}>
+                ${skillsOptions.map((value) => `
+                  <option value="${value}" ${value === Number(skills[2]) ? "selected" : ""}>${value}</option>
+                `).join("")}
+              </select>
+            </td>
+            <td class="num">
+              <select class="select select-sm" data-field="skill4" ${disabledAttr}>
+                ${skillsOptions.map((value) => `
+                  <option value="${value}" ${value === Number(skills[3]) ? "selected" : ""}>${value}</option>
+                `).join("")}
+              </select>
+            </td>
+            <td class="num">
+              <select class="select select-sm" data-field="skill5" ${disabledAttr}>
+                ${skillsOptions.map((value) => `
+                  <option value="${value}" ${value === Number(skills[4]) ? "selected" : ""}>${value}</option>
+                `).join("")}
+              </select>
+            </td>
+            <td class="num">
+              <select class="select select-sm" data-field="skill6" ${disabledAttr}>
+                ${skillsOptions.map((value) => `
+                  <option value="${value}" ${value === Number(skills[5]) ? "selected" : ""}>${value}</option>
+                `).join("")}
+              </select>
             </td>
           </tr>
         `;
@@ -209,14 +259,16 @@
     if (!hero) return;
     if (field === "unlocked") {
       hero.unlocked = Boolean(value);
+    } else if (field === "rarity") {
+      hero.rarity = String(value || "Common").trim() || "Common";
     } else if (field === "level") {
-      hero.level = Math.max(1, Math.floor(Number(value) || 1));
+      hero.level = Math.max(0, Math.floor(Number(value) || 0));
     } else if (field === "stars") {
       hero.stars = Math.max(0, Math.floor(Number(value) || 0));
-    } else if (field === "skill1" || field === "skill2" || field === "skill3") {
+    } else if (field.startsWith("skill")) {
       const idx = Number(field.replace("skill", "")) - 1;
       const updated = normalizeSkills(hero.skills);
-      updated[idx] = Math.max(1, Math.floor(Number(value) || 1));
+      updated[idx] = Math.max(0, Math.floor(Number(value) || 0));
       hero.skills = updated;
     }
     hero.updatedAt = nowIso();
@@ -227,13 +279,13 @@
   if (tbody) {
     tbody.addEventListener("change", (e) => {
       const target = e.target;
-      if (!(target instanceof HTMLInputElement)) return;
+      if (!(target instanceof HTMLInputElement || target instanceof HTMLSelectElement)) return;
       const row = target.closest("tr");
       const id = row?.getAttribute("data-id");
       const field = target.getAttribute("data-field");
       if (!id || !field) return;
 
-      const value = target.type === "checkbox" ? target.checked : target.value;
+      const value = target instanceof HTMLInputElement && target.type === "checkbox" ? target.checked : target.value;
       updateHeroField(id, field, value);
       render();
     });
