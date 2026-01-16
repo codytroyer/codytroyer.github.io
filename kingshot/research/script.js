@@ -145,25 +145,19 @@
     );
   }
 
-  function lastStageIndices(stagesPerTier) {
-    if (stagesPerTier <= 1) return [0];
-    return [stagesPerTier - 2, stagesPerTier - 1];
-  }
-
   function romanNumeral(value) {
     const numerals = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
     return numerals[value - 1] || String(value);
   }
 
-  function isStageUnlocked(progress, tierIndex, stageIndex, stagesPerTier) {
+  function isStageUnlocked(progress, tierIndex, stageIndex) {
     if (tierIndex === 0) {
       if (stageIndex === 0) return true;
       return Boolean(progress[tierIndex]?.[stageIndex - 1]);
     }
 
     const prevTier = progress[tierIndex - 1];
-    const requiredStages = lastStageIndices(stagesPerTier);
-    const prevTierReady = requiredStages.every((idx) => Boolean(prevTier?.[idx]));
+    const prevTierReady = Array.isArray(prevTier) && prevTier.some(Boolean);
     if (!prevTierReady) return false;
     if (stageIndex === 0) return true;
     return Boolean(progress[tierIndex]?.[stageIndex - 1]);
@@ -173,7 +167,7 @@
     const cleaned = createEmptyProgress(tiers, stagesPerTier);
     for (let tierIndex = 0; tierIndex < tiers; tierIndex += 1) {
       for (let stageIndex = 0; stageIndex < stagesPerTier; stageIndex += 1) {
-        const unlocked = isStageUnlocked(cleaned, tierIndex, stageIndex, stagesPerTier);
+        const unlocked = isStageUnlocked(cleaned, tierIndex, stageIndex);
         const rawValue = Boolean(raw?.[tierIndex]?.[stageIndex]);
         cleaned[tierIndex][stageIndex] = unlocked && rawValue;
       }
@@ -305,7 +299,7 @@
 
         const tierRows = progress.map((tier, tierIndex) => {
           const stages = tier.map((stageValue, stageIndex) => {
-            const unlocked = isStageUnlocked(progress, tierIndex, stageIndex, tree.stagesPerTier);
+            const unlocked = isStageUnlocked(progress, tierIndex, stageIndex);
             const statusClass = stageValue ? "done" : "";
             const lockClass = unlocked ? "" : "locked";
             const inputId = `${branchId}-t${tierIndex + 1}-s${stageIndex + 1}`;
@@ -330,7 +324,6 @@
             <div class="tier-row">
               <div>
                 <div class="tier-label">${romanNumeral(tierIndex + 1)}</div>
-                <div class="branch-meta">${tier.filter(Boolean).length}/${tier.length} stages</div>
               </div>
               <div class="stage-group">
                 <span class="stage-label">Stage</span>
