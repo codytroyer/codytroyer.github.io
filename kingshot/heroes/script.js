@@ -192,6 +192,11 @@
     const view = rosterForView();
     const skillsOptions = Array.from({ length: 6 }, (_, value) => value);
     const starsOptions = Array.from({ length: 6 }, (_, value) => value);
+    const skillCountsByRarity = {
+      r: { conquest: 2, expedition: 2 },
+      sr: { conquest: 3, expedition: 2 },
+      ssr: { conquest: 3, expedition: 3 },
+    };
     if (tbody) {
       tbody.innerHTML = view.map((h) => {
         const lockedClass = h.unlocked ? "" : " is-locked";
@@ -199,6 +204,12 @@
         const skills = normalizeSkills(h.skills);
         const rarity = h.rarity || "R";
         const rarityClass = `rarity-${rarity.toLowerCase()}`;
+        const rarityKey = rarity.toLowerCase();
+        const counts = skillCountsByRarity[rarityKey] || skillCountsByRarity.r;
+        const conquestEnabled = [true, true, counts.conquest >= 3];
+        const expeditionEnabled = [true, true, counts.expedition >= 3];
+        const conquestDisabled = (index) => (!h.unlocked || !conquestEnabled[index]) ? "disabled" : "";
+        const expeditionDisabled = (index) => (!h.unlocked || !expeditionEnabled[index]) ? "disabled" : "";
         return `
           <tr class="${lockedClass.trim()}" data-id="${escapeHtml(h.id)}">
             <td><strong class="${escapeHtml(rarityClass)}">${escapeHtml(h.name)}</strong></td>
@@ -216,42 +227,42 @@
               </select>
             </td>
             <td class="num">
-              <select class="select select-sm" data-field="skill1" ${disabledAttr}>
+              <select class="select select-sm" data-field="skill1" ${conquestDisabled(0)}>
                 ${skillsOptions.map((value) => `
                   <option value="${value}" ${value === Number(skills[0]) ? "selected" : ""}>${value}</option>
                 `).join("")}
               </select>
             </td>
             <td class="num">
-              <select class="select select-sm" data-field="skill2" ${disabledAttr}>
+              <select class="select select-sm" data-field="skill2" ${conquestDisabled(1)}>
                 ${skillsOptions.map((value) => `
                   <option value="${value}" ${value === Number(skills[1]) ? "selected" : ""}>${value}</option>
                 `).join("")}
               </select>
             </td>
             <td class="num">
-              <select class="select select-sm" data-field="skill3" ${disabledAttr}>
+              <select class="select select-sm" data-field="skill3" ${conquestDisabled(2)}>
                 ${skillsOptions.map((value) => `
                   <option value="${value}" ${value === Number(skills[2]) ? "selected" : ""}>${value}</option>
                 `).join("")}
               </select>
             </td>
             <td class="num">
-              <select class="select select-sm" data-field="skill4" ${disabledAttr}>
+              <select class="select select-sm" data-field="skill4" ${expeditionDisabled(0)}>
                 ${skillsOptions.map((value) => `
                   <option value="${value}" ${value === Number(skills[3]) ? "selected" : ""}>${value}</option>
                 `).join("")}
               </select>
             </td>
             <td class="num">
-              <select class="select select-sm" data-field="skill5" ${disabledAttr}>
+              <select class="select select-sm" data-field="skill5" ${expeditionDisabled(1)}>
                 ${skillsOptions.map((value) => `
                   <option value="${value}" ${value === Number(skills[4]) ? "selected" : ""}>${value}</option>
                 `).join("")}
               </select>
             </td>
             <td class="num">
-              <select class="select select-sm" data-field="skill6" ${disabledAttr}>
+              <select class="select select-sm" data-field="skill6" ${expeditionDisabled(2)}>
                 ${skillsOptions.map((value) => `
                   <option value="${value}" ${value === Number(skills[5]) ? "selected" : ""}>${value}</option>
                 `).join("")}
