@@ -37,12 +37,12 @@
       </div>
       <h1>Bear Event Optimizer</h1>
       <p class="muted lead">
-        Plug in your troop inventory and rally capacity to generate a Bear rally + join rally breakdown.
+        Plug in your troop inventory and rally capacity to generate a Bear rally + squad breakdown.
         This optimizer prioritizes archers first, then splits the remaining capacity between cavalry and
         infantry. Use it to quickly see how many troops to deploy per rally.
       </p>
       <div class="notice">
-        <strong>Assumptions:</strong> At most one Bear rally is led, and up to six joining rallies are supported.
+        <strong>Assumptions:</strong> At most one Bear rally is led, and up to six squads are supported.
         If your troop inventory is smaller than your total deployment capacity, the plan scales down evenly
         and flags unfilled slots.
       </div>
@@ -87,18 +87,18 @@
             <input class="input" id="bearCapacity" type="number" min="0" value="140000" />
           </div>
           <div class="control">
-            <label class="label" for="joinCapacity">Joining rally capacity (per rally)</label>
+            <label class="label" for="joinCapacity">Squad capacity (per squad)</label>
             <input class="input" id="joinCapacity" type="number" min="0" value="80000" />
           </div>
           <div class="control">
-            <label class="label" for="joinCount">Joining rallies (0-6)</label>
-            <input class="input" id="joinCount" type="number" min="0" max="6" value="4" />
+            <label class="label" for="joinCount">Squads (1-6)</label>
+            <input class="input" id="joinCount" type="number" min="1" max="6" value="4" />
           </div>
           <div class="capacity-card">
             <div>
               <span class="label">Total deployment capacity</span>
               <div class="metric" id="totalCapacity">0</div>
-              <p class="muted small" id="capacityNote">Based on your Bear rally + joining rallies.</p>
+              <p class="muted small" id="capacityNote">Based on your Bear rally + squads.</p>
             </div>
             <div class="bar" aria-hidden="true">
               <span class="fill" id="capacityBar"></span>
@@ -111,7 +111,7 @@
     <section class="panel" id="plan" aria-label="Optimized rally plan">
       <div class="panel-head">
         <h2>2) Optimized rally plan</h2>
-        <p class="muted small">Balanced to maximize archers, then split cavalry/infantry.</p>
+        <p class="muted small">Balanced to maximize archers, then split cavalry/infantry. Heroes are pulled from your saved roster.</p>
       </div>
 
       <div class="summary">
@@ -141,6 +141,7 @@
               <th class="num">Infantry</th>
               <th class="num">Cavalry</th>
               <th class="num">Archers</th>
+              <th class="num">Heroes</th>
               <th class="num">Unfilled</th>
             </tr>
           </thead>
@@ -152,7 +153,7 @@
         <h3>How to use this plan</h3>
         <ul class="list">
           <li>Use the “Bear rally” row to set your own rally composition.</li>
-          <li>Use the “Joining rallies” row for each supporting rally you send.</li>
+          <li>Use the Squad rows for each supporting rally you send.</li>
           <li>If unfilled slots appear, either lower rally sizes or recruit more troops.</li>
         </ul>
       </div>

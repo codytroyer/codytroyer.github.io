@@ -26,6 +26,9 @@
   const planRows = document.getElementById("planRows");
 
   const storageKey = "kingshot-theme";
+  const HERO_STORAGE_KEY = "kingshot:heroes:v2";
+  const HERO_LEGACY_KEY = "kingshot:heroes:v1";
+  const HERO_TYPES = ["Infantry", "Cavalry", "Archer"];
 
   function applyTheme(theme) {
     if (theme === "light" || theme === "dark") {
@@ -64,6 +67,15 @@
 
   function formatPercent(value) {
     return `${Math.round(value * 100)}%`;
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
   }
 
   function setBar(barEl, percent) {
@@ -117,13 +129,48 @@
     return results;
   }
 
+  function loadRoster() {
+    const tryLoad = (key) => {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    };
+    const current = tryLoad(HERO_STORAGE_KEY);
+    if (current.length) return current;
+    return tryLoad(HERO_LEGACY_KEY);
+  }
+
+  function buildHeroPools() {
+    const roster = loadRoster();
+    const unlocked = roster.filter((hero) => hero?.unlocked && HERO_TYPES.includes(hero?.type));
+    const pools = HERO_TYPES.reduce((acc, type) => {
+      acc[type] = unlocked
+        .filter((hero) => hero.type === type)
+        .sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+      return acc;
+    }, {});
+    return pools;
+  }
+
+  function assignSquadHeroes(pools) {
+    const hasAllTypes = HERO_TYPES.every((type) => pools[type]?.length);
+    if (!hasAllTypes) return null;
+    const selection = HERO_TYPES.map((type) => pools[type].shift());
+    return selection.map((hero) => hero?.name || "").filter(Boolean);
+  }
+
   function render() {
     const infantry = parseNumber(infantryInput?.value);
     const cavalry = parseNumber(cavalryInput?.value);
     const archers = parseNumber(archersInput?.value);
     const bearCapacity = parseNumber(bearCapacityInput?.value);
     const joinCapacity = parseNumber(joinCapacityInput?.value);
-    const joinCount = clamp(parseNumber(joinCountInput?.value), 0, 6);
+    const joinCount = clamp(parseNumber(joinCountInput?.value), 1, 6);
 
     if (joinCountInput) joinCountInput.value = joinCount;
 
@@ -154,7 +201,7 @@
     if (totalCapacityEl) totalCapacityEl.textContent = formatNumber(totalCapacity);
     if (capacityNoteEl) {
       capacityNoteEl.textContent = totalCapacity
-        ? `Bear rally + ${joinCount} join rallies.`
+        ? `Bear rally + ${joinCount} squads.`
         : "Enter capacities to see totals.";
     }
 
@@ -189,20 +236,56 @@
     const joinEffective = Math.round(joinCapacity * coverage);
 
     const [bearInf, bearCav, bearArch] = allocateByPercent(bearEffective, percents);
-    const [joinInf, joinCav, joinArch] = allocateByPercent(joinEffective, percents);
-
     const bearUnfilled = Math.max(bearCapacity - bearEffective, 0);
-    const joinUnfilled = Math.max(joinCapacity - joinEffective, 0);
 
-    const joinTotalInf = joinInf * joinCount;
-    const joinTotalCav = joinCav * joinCount;
-    const joinTotalArch = joinArch * joinCount;
-    const joinTotalUnfilled = joinUnfilled * joinCount;
+    const heroPools = buildHeroPools();
+    const squadRows = Array.from({ length: joinCount }, (_, index) => {
+      const [squadInf, squadCav, squadArch] = allocateByPercent(joinEffective, percents);
+      const squadUnfilled = Math.max(joinCapacity - joinEffective, 0);
+      const heroNames = assignSquadHeroes(heroPools);
+      const heroMarkup = heroNames
+        ? heroNames.map((name) => `<span class="hero-pill">${escapeHtml(name)}</span>`).join("")
+        : "";
+      return {
+        label: `Squad ${index + 1}`,
+        capacity: joinCapacity,
+        infantry: squadInf,
+        cavalry: squadCav,
+        archers: squadArch,
+        heroes: heroMarkup,
+        unfilled: squadUnfilled,
+      };
+    });
 
-    const grandInf = bearInf + joinTotalInf;
-    const grandCav = bearCav + joinTotalCav;
-    const grandArch = bearArch + joinTotalArch;
-    const grandUnfilled = bearUnfilled + joinTotalUnfilled;
+    const totals = squadRows.reduce(
+      (acc, row) => {
+        acc.capacity += row.capacity;
+        acc.infantry += row.infantry;
+        acc.cavalry += row.cavalry;
+        acc.archers += row.archers;
+        acc.unfilled += row.unfilled;
+        return acc;
+      },
+      {
+        capacity: bearCapacity,
+        infantry: bearInf,
+        cavalry: bearCav,
+        archers: bearArch,
+        unfilled: bearUnfilled,
+      },
+    );
+
+    const squadRowsMarkup = squadRows.map((row) => `
+      <tr>
+        <td>${escapeHtml(row.label)}</td>
+        <td class="num">${formatNumber(row.capacity)}</td>
+        <td class="num">${formatNumber(row.infantry)}</td>
+        <td class="num">${formatNumber(row.cavalry)}</td>
+        <td class="num">${formatNumber(row.archers)}</td>
+        <td class="num hero-cell">${row.heroes}</td>
+        <td class="num">${formatNumber(row.unfilled)}</td>
+      </tr>
+    `).join("");
 
     planRows.innerHTML = `
       <tr>
@@ -211,31 +294,18 @@
         <td class="num">${formatNumber(bearInf)}</td>
         <td class="num">${formatNumber(bearCav)}</td>
         <td class="num">${formatNumber(bearArch)}</td>
+        <td class="num hero-cell"></td>
         <td class="num">${formatNumber(bearUnfilled)}</td>
       </tr>
-      <tr>
-        <td>Joining rallies (each)</td>
-        <td class="num">${formatNumber(joinCapacity)}</td>
-        <td class="num">${formatNumber(joinInf)}</td>
-        <td class="num">${formatNumber(joinCav)}</td>
-        <td class="num">${formatNumber(joinArch)}</td>
-        <td class="num">${formatNumber(joinUnfilled)}</td>
-      </tr>
-      <tr>
-        <td>Joining rallies (total x${joinCount})</td>
-        <td class="num">${formatNumber(joinCapacity * joinCount)}</td>
-        <td class="num">${formatNumber(joinTotalInf)}</td>
-        <td class="num">${formatNumber(joinTotalCav)}</td>
-        <td class="num">${formatNumber(joinTotalArch)}</td>
-        <td class="num">${formatNumber(joinTotalUnfilled)}</td>
-      </tr>
+      ${squadRowsMarkup}
       <tr>
         <td><strong>Grand total</strong></td>
-        <td class="num"><strong>${formatNumber(totalCapacity)}</strong></td>
-        <td class="num"><strong>${formatNumber(grandInf)}</strong></td>
-        <td class="num"><strong>${formatNumber(grandCav)}</strong></td>
-        <td class="num"><strong>${formatNumber(grandArch)}</strong></td>
-        <td class="num"><strong>${formatNumber(grandUnfilled)}</strong></td>
+        <td class="num"><strong>${formatNumber(totals.capacity)}</strong></td>
+        <td class="num"><strong>${formatNumber(totals.infantry)}</strong></td>
+        <td class="num"><strong>${formatNumber(totals.cavalry)}</strong></td>
+        <td class="num"><strong>${formatNumber(totals.archers)}</strong></td>
+        <td class="num hero-cell"></td>
+        <td class="num"><strong>${formatNumber(totals.unfilled)}</strong></td>
       </tr>
     `;
   }
