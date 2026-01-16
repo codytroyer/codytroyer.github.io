@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Save your Kingshot pets roster for reuse across tools." />
+  <title>Kingshot Pets Roster</title>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="../" aria-label="Back to Kingshot tools">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-text">Kingshot Labs</span>
+      </a>
+
+      <nav class="header-nav" aria-label="Primary">
+        <a class="nav-link" href="../">Tools</a>
+        <a class="nav-link" href="#roster">Roster</a>
+        <a class="nav-link" href="#import">Import/Export</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn ghost" id="toggleTheme" type="button">Theme</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main">
+    <section class="hero">
+      <div class="badge-row">
+        <span class="badge">Live tool</span>
+        <span class="badge subtle">Saved locally</span>
+      </div>
+      <h1>Pets Roster</h1>
+      <p class="muted lead">
+        Your roster starts with 11 default pets. Mark which ones you have unlocked and fill in their
+        levels, ability level, and refinement tiers for reuse across Kingshot tools. Data is stored locally in
+        your browser (no accounts, no server).
+      </p>
+
+      <div class="notice">
+        <strong>Privacy:</strong> This roster is saved in <code>localStorage</code> on this device/browser only.
+        Clearing site data or using a different browser/device will reset it.
+      </div>
+    </section>
+
+    <section class="panel" id="roster" aria-label="Roster editor">
+      <div class="panel-head">
+        <h2>Your pets</h2>
+        <div class="panel-actions">
+          <button class="btn ghost" id="resetRoster" type="button">Reset defaults</button>
+        </div>
+      </div>
+
+      <div class="filters">
+        <div class="control">
+          <label class="label" for="search">Search</label>
+          <input class="input" id="search" type="search" placeholder="Search by pet name…" autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table" aria-label="Pets table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th class="num">Unlocked</th>
+              <th class="num">Level</th>
+              <th class="num">Ability Level</th>
+              <th class="num">Inf. Lethality</th>
+              <th class="num">Inf. Health</th>
+              <th class="num">Cav. Lethality</th>
+              <th class="num">Cav. Health</th>
+              <th class="num">Archer Lethality</th>
+              <th class="num">Archer Health</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="empty" id="emptyState" hidden>
+        <h3>No pets yet</h3>
+        <p class="muted">Your default roster will appear here.</p>
+      </div>
+    </section>
+
+    <section class="panel" id="bonuses" aria-label="Total pet stat bonuses">
+      <div class="panel-head">
+        <h2>Total pet stat bonuses</h2>
+        <p class="muted small">Enter your overall pet bonus stats. Values are percentages and stored locally.</p>
+      </div>
+
+      <div class="bonus-grid">
+        <div class="control">
+          <label class="label" for="bonusInfLethality">Infantry Lethality (%)</label>
+          <input class="input bonus-input" id="bonusInfLethality" type="text" inputmode="decimal" placeholder="0" />
+        </div>
+        <div class="control">
+          <label class="label" for="bonusInfHealth">Infantry Health (%)</label>
+          <input class="input bonus-input" id="bonusInfHealth" type="text" inputmode="decimal" placeholder="0" />
+        </div>
+        <div class="control">
+          <label class="label" for="bonusCavLethality">Cavalry Lethality (%)</label>
+          <input class="input bonus-input" id="bonusCavLethality" type="text" inputmode="decimal" placeholder="0" />
+        </div>
+        <div class="control">
+          <label class="label" for="bonusCavHealth">Cavalry Health (%)</label>
+          <input class="input bonus-input" id="bonusCavHealth" type="text" inputmode="decimal" placeholder="0" />
+        </div>
+        <div class="control">
+          <label class="label" for="bonusArcherLethality">Archer Lethality (%)</label>
+          <input class="input bonus-input" id="bonusArcherLethality" type="text" inputmode="decimal" placeholder="0" />
+        </div>
+        <div class="control">
+          <label class="label" for="bonusArcherHealth">Archer Health (%)</label>
+          <input class="input bonus-input" id="bonusArcherHealth" type="text" inputmode="decimal" placeholder="0" />
+        </div>
+        <div class="control">
+          <label class="label" for="bonusSquadAttack">Squad's Attack (%)</label>
+          <input class="input bonus-input" id="bonusSquadAttack" type="text" inputmode="decimal" placeholder="0" />
+        </div>
+        <div class="control">
+          <label class="label" for="bonusSquadDefense">Squad's Defense (%)</label>
+          <input class="input bonus-input" id="bonusSquadDefense" type="text" inputmode="decimal" placeholder="0" />
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="import" aria-label="Import and export">
+      <div class="panel-head">
+        <h2>Backup & transfer</h2>
+        <p class="muted small">
+          Export JSON to back up your roster or move it to another device. Import replaces your current roster.
+        </p>
+      </div>
+
+      <div class="io-grid">
+        <div class="io-card">
+          <h3>Export</h3>
+          <p class="muted">Download a JSON file of your roster.</p>
+          <div class="io-actions">
+            <button class="btn primary" id="exportBtn" type="button">Download JSON</button>
+          </div>
+        </div>
+
+        <div class="io-card">
+          <h3>Import</h3>
+          <p class="muted">Load a previously exported JSON file.</p>
+          <div class="io-actions">
+            <input class="file" id="importFile" type="file" accept="application/json" />
+            <button class="btn" id="importBtn" type="button">Import (replace roster)</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="debugPanel" aria-label="Data model" hidden>
+      <div class="panel-head">
+        <h2>For future tools</h2>
+        <p class="muted small">
+          This page stores a simple roster object other tools can read. Next calculators can pull your pets
+          and let you pick a lineup, compare builds, etc.
+        </p>
+      </div>
+      <pre class="code"><code id="debugPreview" aria-label="Roster JSON preview"></code></pre>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span class="muted small">© <span id="year"></span> Kingshot Labs</span>
+      <a class="muted small" href="../">Back to tools</a>
+    </div>
+  </footer>
+
+  <script src="pet-constants.js" defer></script>
+  <script src="script.js" defer></script>
+</body>
+</html>
