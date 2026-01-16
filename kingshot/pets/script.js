@@ -422,6 +422,7 @@
         schema: "kingshot:pets:v1",
         exportedAt: nowIso(),
         pets: roster,
+        bonuses: bonusState,
       };
       const file = `kingshot-pets-${new Date().toISOString().slice(0, 10)}.json`;
       download(file, JSON.stringify(payload, null, 2));
@@ -455,6 +456,12 @@
 
         roster = mergeWithDefaults(pets.map(sanitizePet));
         saveRoster(roster);
+        if (parsed?.bonuses && typeof parsed.bonuses === "object") {
+          bonusInputs.forEach(({ key }) => {
+            bonusState[key] = parseBonusInput(parsed.bonuses[key]);
+          });
+          saveBonuses(bonusState);
+        }
         render();
 
         alert(`Imported ${roster.length} pets.`);
