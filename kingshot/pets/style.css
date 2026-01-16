@@ -173,6 +173,11 @@ a{color:inherit}
 .rarity-rare{color:#5aa7ff}
 .rarity-epic{color:#b079ff}
 .rarity-mythical{color:#f1c55f}
+.refinement-common{color:#b7b7b7}
+.refinement-uncommon{color:#5ecb7d}
+.refinement-rare{color:#5aa7ff}
+.refinement-epic{color:#b079ff}
+.refinement-mythical{color:#f1c55f}
 
 .empty{padding:14px;border-radius:var(--radius2);border:1px dashed var(--border);background:rgba(255,255,255,.02)}
 .empty h3{margin:0 0 6px 0}

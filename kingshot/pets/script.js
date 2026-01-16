@@ -214,7 +214,7 @@
   function refinementCell(pet, fieldKey, disabledAttr) {
     const selected = pet.refinement?.[fieldKey] || "common";
     return `
-      <select class="select select-sm" data-field="refine:${escapeHtml(fieldKey)}" ${disabledAttr}>
+      <select class="select select-sm refinement-${escapeHtml(selected)}" data-field="refine:${escapeHtml(fieldKey)}" ${disabledAttr}>
         ${REFINEMENT_TIERS.map((tier) => `
           <option value="${tier.value}" ${tier.value === selected ? "selected" : ""}>${tier.label}</option>
         `).join("")}
