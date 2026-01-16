@@ -150,6 +150,11 @@
     return [stagesPerTier - 2, stagesPerTier - 1];
   }
 
+  function romanNumeral(value) {
+    const numerals = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
+    return numerals[value - 1] || String(value);
+  }
+
   function isStageUnlocked(progress, tierIndex, stageIndex, stagesPerTier) {
     if (tierIndex === 0) {
       if (stageIndex === 0) return true;
@@ -301,34 +306,36 @@
         const tierRows = progress.map((tier, tierIndex) => {
           const stages = tier.map((stageValue, stageIndex) => {
             const unlocked = isStageUnlocked(progress, tierIndex, stageIndex, tree.stagesPerTier);
-            const stageLabel = `Stage ${stageIndex + 1}`;
             const statusClass = stageValue ? "done" : "";
             const lockClass = unlocked ? "" : "locked";
             const inputId = `${branchId}-t${tierIndex + 1}-s${stageIndex + 1}`;
+            const label = `Stage ${stageIndex + 1}`;
 
             return `
-              <label class="stage-chip ${statusClass} ${lockClass}" for="${escapeHtml(inputId)}">
-                <input
-                  id="${escapeHtml(inputId)}"
-                  type="checkbox"
-                  data-branch="${escapeHtml(branchId)}"
-                  data-tier="${tierIndex}"
-                  data-stage="${stageIndex}"
-                  ${stageValue ? "checked" : ""}
-                  ${unlocked ? "" : "disabled"}
-                />
-                ${escapeHtml(stageLabel)}
-              </label>
+              <input
+                id="${escapeHtml(inputId)}"
+                class="stage-check ${statusClass} ${lockClass}"
+                type="checkbox"
+                aria-label="${escapeHtml(label)}"
+                data-branch="${escapeHtml(branchId)}"
+                data-tier="${tierIndex}"
+                data-stage="${stageIndex}"
+                ${stageValue ? "checked" : ""}
+                ${unlocked ? "" : "disabled"}
+              />
             `;
           }).join("");
 
           return `
             <div class="tier-row">
               <div>
-                <div class="tier-label">Tier ${tierIndex + 1}</div>
+                <div class="tier-label">${romanNumeral(tierIndex + 1)}</div>
                 <div class="branch-meta">${tier.filter(Boolean).length}/${tier.length} stages</div>
               </div>
-              <div class="stage-row">${stages}</div>
+              <div class="stage-group">
+                <span class="stage-label">Stage</span>
+                <div class="stage-row">${stages}</div>
+              </div>
             </div>
           `;
         }).join("");

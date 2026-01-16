@@ -171,7 +171,7 @@ a{color:inherit}
 .tier-list{display:grid;gap:8px}
 .tier-row{
   display:grid;
-  grid-template-columns: 70px 1fr;
+  grid-template-columns: 60px 1fr;
   gap:10px;
   align-items:center;
   padding:8px;
@@ -180,17 +180,12 @@ a{color:inherit}
   background:rgba(255,255,255,.02);
 }
 .tier-label{font-size:12px;text-transform:uppercase;color:var(--muted2);letter-spacing:.04em}
+.stage-group{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.stage-label{font-size:12px;color:var(--muted2);letter-spacing:.04em;text-transform:uppercase}
 .stage-row{display:flex;flex-wrap:wrap;gap:8px}
-.stage-chip{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:6px 8px;border-radius:999px;
-  border:1px solid var(--border);
-  background:rgba(255,255,255,.03);
-  font-size:12px;
-}
-.stage-chip input{accent-color:var(--accent)}
-.stage-chip.locked{opacity:.55}
-.stage-chip.done{border-color:rgba(49,208,170,.4);background:rgba(49,208,170,.12)}
+.stage-check{accent-color:var(--accent);width:16px;height:16px}
+.stage-check.locked{opacity:.55}
+.stage-check.done{outline:1px solid rgba(49,208,170,.4);outline-offset:2px;border-radius:4px}
 
 .empty{padding:14px;border-radius:var(--radius2);border:1px dashed var(--border);background:rgba(255,255,255,.02)}
 .empty h3{margin:0 0 6px 0}
