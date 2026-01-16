@@ -5,7 +5,36 @@
   const STORAGE_KEY = "kingshot:heroes:v2";
   const LEGACY_STORAGE_KEY = "kingshot:heroes:v1";
   const THEME_KEY = "kingshot-theme";
-  const DEFAULT_HERO_COUNT = 28;
+  const DEFAULT_HEROES = [
+    { name: "Rosa", rarity: "R" },
+    { name: "Alcar", rarity: "R" },
+    { name: "Zoe", rarity: "R" },
+    { name: "Jabel", rarity: "R" },
+    { name: "Petra", rarity: "R" },
+    { name: "Long Fei", rarity: "R" },
+    { name: "Diana", rarity: "R" },
+    { name: "Chenko", rarity: "R" },
+    { name: "Quinn", rarity: "SR" },
+    { name: "Gordon", rarity: "SR" },
+    { name: "Howard", rarity: "SR" },
+    { name: "Hilde", rarity: "SR" },
+    { name: "Marlin", rarity: "SR" },
+    { name: "Amadeus", rarity: "SR" },
+    { name: "Forrest", rarity: "SR" },
+    { name: "Olive", rarity: "SR" },
+    { name: "Fahd", rarity: "SR" },
+    { name: "Amane", rarity: "SSR" },
+    { name: "Yeonwoo", rarity: "SSR" },
+    { name: "Jaeger", rarity: "SSR" },
+    { name: "Edwin", rarity: "SSR" },
+    { name: "Seth", rarity: "SSR" },
+    { name: "Margot", rarity: "SSR" },
+    { name: "Eric", rarity: "SSR" },
+    { name: "Saul", rarity: "SSR" },
+    { name: "Helga", rarity: "SSR" },
+    { name: "Vivian", rarity: "SSR" },
+    { name: "Thrud", rarity: "SSR" },
+  ];
 
   // Elements
   const yearEl = document.getElementById("year");
@@ -51,13 +80,12 @@
   }
 
   function buildDefaultRoster() {
-    return Array.from({ length: DEFAULT_HERO_COUNT }, (_, index) => {
+    return DEFAULT_HEROES.map((hero, index) => {
       const id = `hero-${index + 1}`;
-      const name = `Hero${index + 1}`;
       return sanitizeHero({
         id,
-        name,
-        rarity: "Common",
+        name: hero.name,
+        rarity: hero.rarity,
         unlocked: false,
         level: 0,
         stars: 0,
@@ -80,7 +108,7 @@
 
   function sanitizeHero(h) {
     const name = String(h.name || "").trim().slice(0, 60);
-    const rarity = String(h.rarity || "Common").trim().slice(0, 20) || "Common";
+    const rarity = String(h.rarity || "R").trim().slice(0, 20) || "R";
     const level = Number.isFinite(Number(h.level)) ? Math.max(0, Math.floor(Number(h.level))) : 0;
     const stars = Number.isFinite(Number(h.stars)) ? Math.max(0, Math.floor(Number(h.stars))) : 0;
     const unlocked = Boolean(h.unlocked);
@@ -164,14 +192,14 @@
     const view = rosterForView();
     const skillsOptions = Array.from({ length: 6 }, (_, value) => value);
     const starsOptions = Array.from({ length: 6 }, (_, value) => value);
-    const rarityOptions = ["Common", "Rare", "Epic", "Legendary", "Mythic"];
+    const rarityOptions = ["R", "SR", "SSR"];
 
     if (tbody) {
       tbody.innerHTML = view.map((h) => {
         const lockedClass = h.unlocked ? "" : " is-locked";
         const disabledAttr = h.unlocked ? "" : "disabled";
         const skills = normalizeSkills(h.skills);
-        const rarity = h.rarity || "Common";
+        const rarity = h.rarity || "R";
         return `
           <tr class="${lockedClass.trim()}" data-id="${escapeHtml(h.id)}">
             <td><strong>${escapeHtml(h.name)}</strong></td>
@@ -260,7 +288,7 @@
     if (field === "unlocked") {
       hero.unlocked = Boolean(value);
     } else if (field === "rarity") {
-      hero.rarity = String(value || "Common").trim() || "Common";
+      hero.rarity = String(value || "R").trim() || "R";
     } else if (field === "level") {
       hero.level = Math.max(0, Math.floor(Number(value) || 0));
     } else if (field === "stars") {
