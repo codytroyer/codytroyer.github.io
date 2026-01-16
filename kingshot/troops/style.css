@@ -133,7 +133,7 @@ a{color:inherit}
   box-shadow:0 0 0 4px rgba(124,92,255,.18);
 }
 
-.input-sm{padding:8px 8px;min-width:88px;text-align:center}
+.input-sm{padding:8px 8px;min-width:64px;text-align:center}
 
 .troop-grid{
   display:grid;
@@ -159,12 +159,13 @@ a{color:inherit}
   align-items:center;
   justify-content:space-between;
   gap:10px;
-  padding:8px 10px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  background:rgba(255,255,255,.02);
+  padding:4px 0;
 }
 .level-label{font-size:13px;color:var(--muted2)}
+
+.level-row .input{
+  width:88px;
+}
 
 .code{
   margin:0;

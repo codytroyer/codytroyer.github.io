@@ -46,6 +46,16 @@
     return new Date().toISOString();
   }
 
+  function formatNumber(value) {
+    return value.toLocaleString("en-US");
+  }
+
+  function parseCount(value) {
+    const cleaned = String(value || "").replace(/[^\d]/g, "");
+    const parsed = Number.parseInt(cleaned, 10);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
   function buildDefaultRoster() {
     return TROOP_TYPES.reduce((acc, type) => {
       const levels = LEVELS.reduce((levelsAcc, level) => {
@@ -112,19 +122,20 @@
       const data = roster[type.id];
       const levelRows = LEVELS.map((level) => {
         const id = `${type.id}-level-${level}`;
+        const value = data?.levels?.[level] ?? 0;
         return `
           <div class="level-row">
             <label class="level-label" for="${id}">Level ${level}</label>
             <input
               class="input input-sm"
               id="${id}"
-              type="number"
+              type="text"
               min="0"
               step="1"
               inputmode="numeric"
               data-type="${type.id}"
               data-level="${level}"
-              value="${data?.levels?.[level] ?? 0}"
+              value="${formatNumber(value)}"
             />
           </div>
         `;
@@ -146,8 +157,8 @@
   function updateLevel(typeId, level, value) {
     const troop = roster[typeId];
     if (!troop) return;
-    const numeric = Number(value);
-    troop.levels[level] = Number.isFinite(numeric) && numeric >= 0 ? Math.floor(numeric) : 0;
+    const numeric = parseCount(value);
+    troop.levels[level] = Math.max(0, Math.floor(numeric));
     troop.updatedAt = nowIso();
     saveRoster();
     updateDebugPreview();
@@ -167,6 +178,16 @@
       if (!typeId || Number.isNaN(level)) return;
       updateLevel(typeId, level, target.value);
     });
+
+    troopGrid.addEventListener("blur", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement)) return;
+      const typeId = target.dataset.type;
+      const level = Number(target.dataset.level);
+      if (!typeId || Number.isNaN(level)) return;
+      const value = roster[typeId]?.levels?.[level] ?? 0;
+      target.value = formatNumber(value);
+    }, true);
   }
 
   if (resetTroopsBtn) {
