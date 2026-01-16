@@ -6,9 +6,9 @@
   const DEBUG_PANEL_KEY = "kingshot:troops:debug";
 
   const TROOP_TYPES = [
-    { id: "archers", label: "Archers" },
-    { id: "cavalry", label: "Cavalry" },
     { id: "infantry", label: "Infantry" },
+    { id: "cavalry", label: "Cavalry" },
+    { id: "archers", label: "Archers" },
   ];
 
   const LEVELS = Array.from({ length: 11 }, (_, index) => 11 - index);
