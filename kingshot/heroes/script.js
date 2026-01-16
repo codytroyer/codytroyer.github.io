@@ -5,40 +5,17 @@
   const STORAGE_KEY = "kingshot:heroes:v2";
   const LEGACY_STORAGE_KEY = "kingshot:heroes:v1";
   const THEME_KEY = "kingshot-theme";
-  const DEFAULT_HEROES = [
-    { name: "Rosa", rarity: "SSR" },
-    { name: "Alcar", rarity: "SSR" },
-    { name: "Zoe", rarity: "SSR" },
-    { name: "Jabel", rarity: "SSR" },
-    { name: "Petra", rarity: "SSR" },
-    { name: "Long Fei", rarity: "SSR" },
-    { name: "Hilde", rarity: "SSR" },
-    { name: "Marlin", rarity: "SSR" },
-    { name: "Amadeus", rarity: "SSR" },
-    { name: "Jaeger", rarity: "SSR" },
-    { name: "Margot", rarity: "SSR" },
-    { name: "Eric", rarity: "SSR" },
-    { name: "Saul", rarity: "SSR" },
-    { name: "Helga", rarity: "SSR" },
-    { name: "Vivian", rarity: "SSR" },
-    { name: "Thrud", rarity: "SSR" },
-    { name: "Diana", rarity: "SR" },
-    { name: "Chenko", rarity: "SR" },
-    { name: "Quinn", rarity: "SR" },
-    { name: "Gordon", rarity: "SR" },
-    { name: "Howard", rarity: "SR" },
-    { name: "Fahd", rarity: "SR" },
-    { name: "Amane", rarity: "SR" },
-    { name: "Yeonwoo", rarity: "SR" },
-    { name: "Forrest", rarity: "R" },
-    { name: "Olive", rarity: "R" },
-    { name: "Edwin", rarity: "R" },
-    { name: "Seth", rarity: "R" },
-  ];
+  const DEBUG_PANEL_KEY = "kingshot:heroes:debug";
+  const { HERO_RARITY_BY_NAME, HERO_TYPE_BY_NAME, DEFAULT_HEROES } =
+    window.KINGSHOT_HERO_CONSTANTS || {};
+  if (!DEFAULT_HEROES) {
+    throw new Error("Missing hero constants. Ensure hero-constants.js is loaded before script.js.");
+  }
 
   // Elements
   const yearEl = document.getElementById("year");
   const debugPreview = document.getElementById("debugPreview");
+  const debugPanel = document.getElementById("debugPanel");
 
   const tbody = document.getElementById("tbody");
   const emptyState = document.getElementById("emptyState");
@@ -72,9 +49,14 @@
     });
   }
 
+  if (debugPanel) {
+    const isDebugEnabled = localStorage.getItem(DEBUG_PANEL_KEY) === "1";
+    debugPanel.hidden = !isDebugEnabled;
+  }
+
   // --- Data model ---
   // Hero shape:
-  // { id, name, rarity, unlocked, level, stars, skills: { conquest: number[], expedition: number[] }, updatedAt }
+  // { id, name, rarity, type, unlocked, level, stars, skills: { conquest: number[], expedition: number[] }, updatedAt }
   function nowIso() {
     return new Date().toISOString();
   }
@@ -86,6 +68,7 @@
         id,
         name: hero.name,
         rarity: hero.rarity,
+        type: hero.type,
         unlocked: false,
         level: 1,
         stars: 0,
@@ -131,7 +114,10 @@
 
   function sanitizeHero(h) {
     const name = String(h.name || "").trim().slice(0, 60);
-    const rarity = String(h.rarity || "R").trim().slice(0, 20) || "R";
+    const raritySource = HERO_RARITY_BY_NAME?.[name] || h.rarity || "R";
+    const typeSource = HERO_TYPE_BY_NAME?.[name] || h.type || "Unknown";
+    const rarity = String(raritySource).trim().slice(0, 20) || "R";
+    const type = String(typeSource).trim().slice(0, 20) || "Unknown";
     const level = Number.isFinite(Number(h.level)) ? Math.max(1, Math.floor(Number(h.level))) : 1;
     const stars = Number.isFinite(Number(h.stars)) ? Math.max(0, Math.floor(Number(h.stars))) : 0;
     const unlocked = Boolean(h.unlocked);
@@ -139,7 +125,7 @@
     const id = String(h.id || "");
     const updatedAt = String(h.updatedAt || nowIso());
 
-    return { id, name, rarity, unlocked, level, stars, skills, updatedAt };
+    return { id, name, rarity, type, unlocked, level, stars, skills, updatedAt };
   }
 
   function loadRosterFromKey(key) {
@@ -310,7 +296,7 @@
     const hasAny = roster.length > 0;
     if (emptyState) emptyState.hidden = hasAny;
 
-    if (debugPreview) {
+    if (debugPreview && debugPanel && !debugPanel.hidden) {
       const preview = roster
         .slice()
         .sort((a, b) => a.name.localeCompare(b.name))
