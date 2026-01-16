@@ -5,6 +5,7 @@
   const STORAGE_KEY = "kingshot:heroes:v2";
   const LEGACY_STORAGE_KEY = "kingshot:heroes:v1";
   const THEME_KEY = "kingshot-theme";
+  const DEBUG_PANEL_KEY = "kingshot:heroes:debug";
   const { HERO_RARITY_BY_NAME, HERO_TYPE_BY_NAME, DEFAULT_HEROES } =
     window.KINGSHOT_HERO_CONSTANTS || {};
   if (!DEFAULT_HEROES) {
@@ -14,6 +15,7 @@
   // Elements
   const yearEl = document.getElementById("year");
   const debugPreview = document.getElementById("debugPreview");
+  const debugPanel = document.getElementById("debugPanel");
 
   const tbody = document.getElementById("tbody");
   const emptyState = document.getElementById("emptyState");
@@ -45,6 +47,11 @@
       applyTheme(next);
       localStorage.setItem(THEME_KEY, next);
     });
+  }
+
+  if (debugPanel) {
+    const isDebugEnabled = localStorage.getItem(DEBUG_PANEL_KEY) === "1";
+    debugPanel.hidden = !isDebugEnabled;
   }
 
   // --- Data model ---
@@ -289,7 +296,7 @@
     const hasAny = roster.length > 0;
     if (emptyState) emptyState.hidden = hasAny;
 
-    if (debugPreview) {
+    if (debugPreview && debugPanel && !debugPanel.hidden) {
       const preview = roster
         .slice()
         .sort((a, b) => a.name.localeCompare(b.name))
